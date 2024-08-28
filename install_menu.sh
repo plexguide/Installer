@@ -75,14 +75,14 @@ validate_choice() {
             echo "Selected PG Beta." && echo ""
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
-            run_install_script "https://raw.githubusercontent.com/plexguide/PlexGuide.com/v11/mods/scripts/install_beta.sh"
+            run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_beta.sh"
             exit 0
             ;;
         f)
             echo "Selected PG Fork." && echo ""
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
-            run_install_script "https://raw.githubusercontent.com/plexguide/PlexGuide.com/v11/mods/scripts/install_fork.sh"
+            run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_fork.sh"
             exit 0
             ;;
         z)
