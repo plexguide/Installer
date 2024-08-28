@@ -190,11 +190,11 @@ while true; do
                 echo "Installation canceled."
                 exit 0
             else
-                echo "Invalid input. Please try again."
+                echo "Invalid Input. Please try again."
             fi
         done
     else
         clear
-        echo "Invalid version. Please select a valid version from the list."
+        echo "Invalid Version. Please select a valid version from the list."
     fi
 done
