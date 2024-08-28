@@ -35,7 +35,6 @@ fetch_releases() {
 create_directories() {
     echo "Creating necessary directories..."
 
-    # Define directories to create
     directories=(
         "/pg/config"
         "/pg/scripts"
@@ -44,7 +43,6 @@ create_directories() {
         "/pg/installer"
     )
 
-    # Loop through the directories and create them with the correct permissions
     for dir in "${directories[@]}"; do
         if [[ ! -d "$dir" ]]; then
             mkdir -p "$dir"
@@ -52,9 +50,7 @@ create_directories() {
         else
             echo "$dir already exists"
         fi
-        # Set ownership to user with UID and GID 1000
         chown -R 1000:1000 "$dir"
-        # Set the directories as executable
         chmod -R +x "$dir"
     done
 }
@@ -65,23 +61,17 @@ download_and_extract() {
     local url="https://github.com/plexguide/PlexGuide.com/archive/refs/tags/${selected_version}.zip"
     
     echo "Downloading and extracting ${selected_version}..."
-    
-    # Download the zip file into /pg/stage
     curl -L -o /pg/stage/release.zip "$url"
     
-    # Unzip the contents directly into /pg/stage
     unzip -o /pg/stage/release.zip -d /pg/stage/
-    
-    # Find the extracted folder
     local extracted_folder="/pg/stage/PlexGuide.com-${selected_version}"
     
-    # Check if the folder exists and move the contents if it does
     if [[ -d "$extracted_folder" ]]; then
         echo "Found extracted folder: $extracted_folder"
+        
         if [[ -d "$extracted_folder/mods/apps" ]]; then
             echo "Moving apps to /pg/apps"
             mv "$extracted_folder/mods/apps/"* /pg/apps/
-            # Set ownership and permissions
             chown -R 1000:1000 /pg/apps/
             chmod -R +x /pg/apps/
         else
@@ -91,14 +81,12 @@ download_and_extract() {
         if [[ -d "$extracted_folder/mods/scripts" ]]; then
             echo "Moving scripts to /pg/scripts"
             mv "$extracted_folder/mods/scripts/"* /pg/scripts/
-            # Set ownership and permissions
             chown -R 1000:1000 /pg/scripts/
             chmod -R +x /pg/scripts/
         else
             echo "No scripts directory found in $extracted_folder"
         fi
 
-        # Clear the /pg/stage directory after moving the files
         rm -rf /pg/stage/*
         echo "Cleared /pg/stage directory after moving files."
         
@@ -114,13 +102,11 @@ update_config_version() {
     local selected_version="$1"
     local config_file="/pg/config/config.cfg"
 
-    # Check if the config file exists, create if not
     if [[ ! -f "$config_file" ]]; then
         echo "Creating config file at $config_file"
         touch "$config_file"
     fi
 
-    # Update or add the VERSION variable in the config file
     if grep -q "^VERSION=" "$config_file"; then
         sed -i "s/^VERSION=.*/VERSION=\"$selected_version\"/" "$config_file"
     else
@@ -179,18 +165,16 @@ while true; do
             if [[ "$response" == "$random_pin" ]]; then
                 check_and_install_unzip
                 check_and_install_docker
-                check_and_install_docker
 
-                #prepare_directories
                 create_directories
                 download_and_extract "$selected_version"
                 update_config_version "$selected_version"
 
-                read -p "Press Enter to continue..."
                 # Source the commands.sh script and run the create_command_symlinks function
                 source /pg/installer/commands.sh
                 create_command_symlinks
 
+                read -p "Press Enter to continue..." # Pause for user input
                 show_exit
                 exit 0
             elif [[ "${response,,}" == "z" ]]; then
