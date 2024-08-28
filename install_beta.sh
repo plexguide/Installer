@@ -101,12 +101,6 @@ download_and_extract() {
             echo "No scripts directory found in $extracted_folder"
         fi
 
-        # Execute menu_commands.sh script after moving files
-        if [[ -f "/pg/apps/menu_commands.sh" ]]; then
-            echo "Executing menu_commands.sh"
-            bash /pg/apps/menu_commands.sh
-        fi
-
         # Clear the /pg/stage directory after moving the files
         rm -rf /pg/stage/*
         echo "Cleared /pg/stage directory after moving files."
@@ -162,18 +156,9 @@ display_releases() {
     echo "" # New line after displaying all releases
 }
 
-# Function to restore symbolic links
-restore_symlinks() {
-    if [[ -f /pg/scripts/menu.sh ]]; then
-        sudo ln -sf /pg/scripts/menu.sh /usr/local/bin/plexguide
-        echo "The plexguide command has been restored."
-    else
-        echo "Error: /pg/scripts/menu.sh does not exist. Cannot restore plexguide command."
-    fi
+show_exit() {
+    bash /pg/scripts/menu_exit.sh
 }
-
-# Trap to handle exit and restore symbolic links
-trap 'restore_symlinks' EXIT
 
 # Main logic
 while true; do
@@ -200,7 +185,12 @@ while true; do
                 prepare_directories
                 download_and_extract "$selected_version"
                 update_config_version "$selected_version"
-                bash /pg/scripts/menu_exit.sh
+
+                # Source the commands.sh script and run the create_command_symlinks function
+                source /pg/installer/commands.sh
+                create_command_symlinks
+
+                show_exit
                 exit 0
             elif [[ "${response,,}" == "z" ]]; then
                 echo "Installation canceled."
