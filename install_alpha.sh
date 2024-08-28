@@ -18,6 +18,7 @@ create_directories() {
         "/pg/scripts"
         "/pg/apps"
         "/pg/stage"
+        "/pg/installer"
     )
 
     # Loop through the directories and create them with the correct permissions

@@ -33,6 +33,7 @@ create_directories() {
         "/pg/scripts"
         "/pg/apps"
         "/pg/stage"
+        "/pg/installer"
     )
 
     for dir in "${directories[@]}"; do
