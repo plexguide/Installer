@@ -69,6 +69,11 @@ download_and_extract() {
     if [[ -d "$extracted_folder" ]]; then
         echo "Found extracted folder: $extracted_folder"
         
+        # Clear the /pg/apps/ directory before moving files
+        echo "Clearing /pg/apps/ directory..."
+        rm -rf /pg/apps/*
+        
+        # Move apps to /pg/apps
         if [[ -d "$extracted_folder/mods/apps" ]]; then
             echo "Moving apps to /pg/apps"
             mv "$extracted_folder/mods/apps/"* /pg/apps/
@@ -78,6 +83,11 @@ download_and_extract() {
             echo "No apps directory found in $extracted_folder"
         fi
         
+        # Clear the /pg/scripts/ directory before moving files
+        echo "Clearing /pg/scripts/ directory..."
+        rm -rf /pg/scripts/*
+        
+        # Move scripts to /pg/scripts
         if [[ -d "$extracted_folder/mods/scripts" ]]; then
             echo "Moving scripts to /pg/scripts"
             mv "$extracted_folder/mods/scripts/"* /pg/scripts/
@@ -87,6 +97,7 @@ download_and_extract() {
             echo "No scripts directory found in $extracted_folder"
         fi
 
+        # Clear the /pg/stage directory after moving the files
         rm -rf /pg/stage/*
         echo "Cleared /pg/stage directory after moving files."
         
