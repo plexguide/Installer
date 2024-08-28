@@ -186,6 +186,7 @@ while true; do
                 download_and_extract "$selected_version"
                 update_config_version "$selected_version"
 
+                read -p "Press Enter to continue..."
                 # Source the commands.sh script and run the create_command_symlinks function
                 source /pg/installer/commands.sh
                 create_command_symlinks
