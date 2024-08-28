@@ -66,19 +66,22 @@ validate_choice() {
     case ${choice,,} in
         a)
             echo "Selected PG Alpha." && echo ""
-            download_installer_repo  # Download the main installer repo first
+            prompt_for_pin  # Prompt for PIN before downloading and installing
+            download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_alpha.sh"
             exit 0
             ;;
         b)
             echo "Selected PG Beta." && echo ""
-            download_installer_repo  # Download the main installer repo first
+            prompt_for_pin  # Prompt for PIN before downloading and installing
+            download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/PlexGuide.com/v11/mods/scripts/install_beta.sh"
             exit 0
             ;;
         f)
             echo "Selected PG Fork." && echo ""
-            download_installer_repo  # Download the main installer repo first
+            prompt_for_pin  # Prompt for PIN before downloading and installing
+            download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/PlexGuide.com/v11/mods/scripts/install_fork.sh"
             exit 0
             ;;
@@ -93,32 +96,15 @@ validate_choice() {
     esac
 }
 
-# Function to download and run the selected installation script
-run_install_script() {
-    local script_url="$1"
-    local installer_dir="/pg/installer"
-    local script_file="$installer_dir/install_script.sh"
+# Function to prompt for a 4-digit PIN before proceeding
+prompt_for_pin() {
     local random_pin=$(printf "%04d" $((RANDOM % 10000)))
-
-    # Prepare the /pg/installer directory
-    prepare_installer_directory
 
     while true; do
         read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
         if [[ "$response" == "$random_pin" ]]; then
-            echo "Downloading the installation script..."
-            curl -sL "$script_url" -o "$script_file"
-            
-            # Check if the script was downloaded successfully
-            if [[ -f "$script_file" ]]; then
-                echo "Setting execute permissions and running the installation script..."
-                chmod +x "$script_file"
-                bash "$script_file"
-                exit 0
-            else
-                echo "Failed to download the installation script. Please check your internet connection and try again."
-                exit 1
-            fi
+            echo "Correct PIN entered. Proceeding with installation..."
+            return 0
         elif [[ "${response,,}" == "z" ]]; then
             echo "Installation canceled."
             exit 0
@@ -126,6 +112,30 @@ run_install_script() {
             echo "Invalid input. Please try again."
         fi
     done
+}
+
+# Function to download and run the selected installation script
+run_install_script() {
+    local script_url="$1"
+    local installer_dir="/pg/installer"
+    local script_file="$installer_dir/install_script.sh"
+
+    # Prepare the /pg/installer directory
+    prepare_installer_directory
+
+    echo "Downloading the installation script..."
+    curl -sL "$script_url" -o "$script_file"
+    
+    # Check if the script was downloaded successfully
+    if [[ -f "$script_file" ]]; then
+        echo "Setting execute permissions and running the installation script..."
+        chmod +x "$script_file"
+        bash "$script_file"
+        exit 0
+    else
+        echo "Failed to download the installation script. Please check your internet connection and try again."
+        exit 1
+    fi
 }
 
 # Main loop to display the interface and handle user input
