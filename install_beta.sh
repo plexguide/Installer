@@ -190,7 +190,7 @@ while true; do
                 echo "Installation canceled."
                 exit 0
             else
-                clear
+                echo "Invalid input. Please try again."
             fi
         done
     else
