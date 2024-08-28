@@ -139,8 +139,8 @@ set_config_version() {
     echo "VERSION has been set to PG Alpha in $CONFIG_FILE"
 }
 
-menu_commands() {
-    bash /pg/scripts/menu_commands.sh
+show_exit() {
+    bash /pg/scripts/menu_exit.sh
 }
 
 # New installation process
@@ -155,4 +155,4 @@ set_config_version
 source /pg/installer/commands.sh
 create_command_symlinks
 
-menu_commands
+show_exit
