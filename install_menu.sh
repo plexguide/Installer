@@ -17,6 +17,36 @@ prepare_installer_directory() {
     fi
 }
 
+# Function to download the main Installer repository
+download_installer_repo() {
+    local installer_dir="/pg/installer"
+    local repo_url="https://github.com/plexguide/Installer.git"
+
+    echo "Downloading Installer repository..."
+
+    # Prepare the /pg/installer directory
+    prepare_installer_directory
+
+    # Clear the directory before downloading
+    rm -rf "$installer_dir"/*
+    rm -rf "$installer_dir"/.* 2>/dev/null || true
+
+    # Clone the repository
+    git clone "$repo_url" "$installer_dir"
+
+    # Check if the clone was successful
+    if [[ $? -eq 0 ]]; then
+        echo "Installer repository successfully downloaded to $installer_dir."
+        
+        # Set ownership and permissions
+        chown -R 1000:1000 "$installer_dir"
+        chmod -R +x "$installer_dir"
+    else
+        echo "Failed to download the Installer repository. Please check your internet connection."
+        exit 1
+    fi
+}
+
 # Function to display the interface
 display_interface() {
     clear
@@ -36,16 +66,19 @@ validate_choice() {
     case ${choice,,} in
         a)
             echo "Selected PG Alpha." && echo ""
+            download_installer_repo  # Download the main installer repo first
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_alpha.sh"
             exit 0
             ;;
         b)
             echo "Selected PG Beta." && echo ""
+            download_installer_repo  # Download the main installer repo first
             run_install_script "https://raw.githubusercontent.com/plexguide/PlexGuide.com/v11/mods/scripts/install_beta.sh"
             exit 0
             ;;
         f)
             echo "Selected PG Fork." && echo ""
+            download_installer_repo  # Download the main installer repo first
             run_install_script "https://raw.githubusercontent.com/plexguide/PlexGuide.com/v11/mods/scripts/install_fork.sh"
             exit 0
             ;;
@@ -106,5 +139,3 @@ while true; do
         exit 0
     fi
 done
-
-### testA

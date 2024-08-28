@@ -1,26 +1,29 @@
 #!/bin/bash
 
-    # Create PlexGuide Commands
-    if [[ ! -f "/usr/local/bin/plexguide" ]]; then
-        sudo ln -s /pg/scripts/menu.sh /usr/local/bin/plexguide
-        sudo chmod +x /usr/local/bin/plexguide
-        bash /pg/scripts/menu_exit.sh
-    fi
+# Function to create symbolic links for command scripts
+create_command_symlinks() {
+    echo "Creating command symlinks..."
 
-    if [[ ! -f "/usr/local/bin/pg" ]]; then
-        sudo ln -s /pg/scripts/menu.sh /usr/local/bin/pg
-        sudo chmod +x /usr/local/bin/pg
-        bash /pg/scripts/menu_exit.sh
-    fi
+    # Define an associative array with command names as keys and script paths as values
+    declare -A commands=(
+        ["plexguide"]="/pg/scripts/menu.sh"
+        ["pg"]="/pg/scripts/menu.sh"
+        ["pgalpha"]="/pg/installer/install_alpha.sh"
+        ["pgbeta"]="/pg/installer/install_beta.sh"
+        ["pgfork"]="/pg/installer/install_fork.sh"
+    )
 
-    if [[ ! -f "/usr/local/bin/pgalpha" ]]; then
-        sudo ln -s /pg/scripts/menu_reinstall.sh /usr/local/bin/pgalpha        
-        sudo chmod +x /usr/local/bin/pgalpha
-        bash /pg/scripts/menu_exit.sh
-    fi
+    # Loop over the associative array to create symbolic links and set executable permissions
+    for cmd in "${!commands[@]}"; do
+        # Create the symbolic link with force option to overwrite if it exists
+        sudo ln -sf "${commands[$cmd]}" "/usr/local/bin/$cmd"
 
-    if [[ ! -f "/usr/local/bin/pgbeta" ]]; then
-        sudo ln -s /pg/scripts/install_beta.sh /usr/local/bin/pgbeta       
-        sudo chmod +x /usr/local/bin/pgbeta
-        bash /pg/scripts/menu_exit.sh
-    fi
+        # Set ownership to 1000:1000
+        sudo chown 1000:1000 "/usr/local/bin/$cmd"
+
+        # Set the executable permission to 755 (read and execute for everyone)
+        sudo chmod 755 "/usr/local/bin/$cmd"
+    done
+
+    echo "Command symlinks created successfully."
+}
