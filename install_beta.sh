@@ -184,8 +184,6 @@ while true; do
                 # Source the commands.sh script and run the create_command_symlinks function
                 source /pg/installer/commands.sh
                 create_command_symlinks
-
-                read -p "Press Enter to continue..." # Pause for user input
                 show_exit
                 exit 0
             elif [[ "${response,,}" == "z" ]]; then
