@@ -8,8 +8,8 @@ CYAN="\033[0;36m"
 LIGHT_BLUE="\033[1;34m"
 NC="\033[0m" # No color
 
-prepare_tmp_directory() {
-    local tmp_dir="/pg/tmp"
+prepare_installer_directory() {
+    local tmp_dir="/pg/installer"
     
     # Create the /pg/tmp directory if it doesn't exist
     if [[ ! -d "$tmp_dir" ]]; then
