@@ -36,7 +36,7 @@ validate_choice() {
     case ${choice,,} in
         a)
             echo "Selected PG Alpha." && echo ""
-            run_install_script "https://raw.githubusercontent.com/plexguide/PlexGuide.com/v11/mods/scripts/install_alpha.sh"
+            run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_alpha.sh"
             exit 0
             ;;
         b)
