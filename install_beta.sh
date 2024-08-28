@@ -172,7 +172,7 @@ while true; do
         echo ""
         random_pin=$(printf "%04d" $((RANDOM % 10000)))
         while true; do
-            read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to accept or [${GREEN}Z${NC}] to cancel: ")" response
+            read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
             if [[ "$response" == "$random_pin" ]]; then
                 check_and_install_unzip
                 check_and_install_docker
@@ -190,11 +190,10 @@ while true; do
                 echo "Installation canceled."
                 exit 0
             else
-                echo "Invalid Input. Please try again."
+                echo "Invalid input. Please try again."
             fi
         done
     else
-        clear
-        echo "Invalid Version. Please select a valid version from the list."
+        echo "Invalid version. Please select a valid version from the list."
     fi
 done
