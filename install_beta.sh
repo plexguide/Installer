@@ -31,8 +31,10 @@ fetch_releases() {
     curl -s https://api.github.com/repos/plexguide/PlexGuide.com/releases | jq -r '.[].tag_name' | grep -E '^11\.[0-9]\.B[0-9]+' | sort -r | head -n 50
 }
 
-# Function to prepare directories
-prepare_directories() {
+# Function to create directories with the correct permissions
+create_directories() {
+    echo "Creating necessary directories..."
+
     # Define directories to create
     directories=(
         "/pg/config"
@@ -49,11 +51,6 @@ prepare_directories() {
             echo "Created $dir"
         else
             echo "$dir already exists"
-        fi
-        # Clear the directory if it is /pg/stage, /pg/scripts, or /pg/apps
-        if [[ "$dir" == "/pg/stage" || "$dir" == "/pg/scripts" || "$dir" == "/pg/apps" ]]; then
-            rm -rf "${dir:?}"/*
-            echo "Cleared $dir directory."
         fi
         # Set ownership to user with UID and GID 1000
         chown -R 1000:1000 "$dir"
@@ -182,7 +179,10 @@ while true; do
             if [[ "$response" == "$random_pin" ]]; then
                 check_and_install_unzip
                 check_and_install_docker
-                prepare_directories
+                check_and_install_docker
+
+                #prepare_directories
+                create_directories
                 download_and_extract "$selected_version"
                 update_config_version "$selected_version"
 
