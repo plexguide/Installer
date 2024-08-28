@@ -9,11 +9,11 @@ LIGHT_BLUE="\033[1;34m"
 NC="\033[0m" # No color
 
 prepare_installer_directory() {
-    local tmp_dir="/pg/installer"
+    local installer_dir="/pg/installer"
     
-    # Create the /pg/tmp directory if it doesn't exist
-    if [[ ! -d "$tmp_dir" ]]; then
-        mkdir -p "$tmp_dir"
+    # Create the /pg/installer directory if it doesn't exist
+    if [[ ! -d "$installer_dir" ]]; then
+        mkdir -p "$installer_dir"
     fi
 }
 
@@ -63,12 +63,12 @@ validate_choice() {
 # Function to download and run the selected installation script
 run_install_script() {
     local script_url="$1"
-    local tmp_dir="/pg/tmp"
-    local script_file="$tmp_dir/install_script.sh"
+    local installer_dir="/pg/installer"
+    local script_file="$installer_dir/install_script.sh"
     local random_pin=$(printf "%04d" $((RANDOM % 10000)))
 
-    # Prepare the /pg/tmp directory
-    prepare_tmp_directory
+    # Prepare the /pg/installer directory
+    prepare_installer_directory
 
     while true; do
         read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
