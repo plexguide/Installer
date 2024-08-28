@@ -169,7 +169,7 @@ while true; do
     read -p "Which version do you want to install? " selected_version
 
     if echo "$releases" | grep -q "^${selected_version}$"; then
-        clear
+        echo ""
         random_pin=$(printf "%04d" $((RANDOM % 10000)))
         while true; do
             read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to accept or [${GREEN}Z${NC}] to cancel: ")" response
