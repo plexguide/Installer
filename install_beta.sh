@@ -151,7 +151,7 @@ display_releases() {
 }
 
 show_exit() {
-    bash /pg/scripts/menu_exit.sh
+    bash /pg/installer/menu_exit.sh
 }
 
 # Main logic

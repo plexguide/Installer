@@ -240,7 +240,7 @@ update_branch_name() {
 
 menu_commands() {
     echo "Returning to the main menu..."
-    bash /pg/scripts/menu_commands.sh
+    bash /pg/installer/menu_commands.sh
 }
 
 # Start the PG Fork menu
