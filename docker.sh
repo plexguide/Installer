@@ -22,8 +22,8 @@ fi
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 
-# Add Docker’s official GPG key
-curl -fsSL https://download.docker.com/linux/$OS_NAME/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+# Add Docker’s official GPG key (overwrite without prompting)
+curl -fsSL https://download.docker.com/linux/$OS_NAME/gpg | sudo tee /usr/share/keyrings/docker-archive-keyring.gpg > /dev/null
 
 # Add Docker’s official repository
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$OS_NAME $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
