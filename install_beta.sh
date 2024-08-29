@@ -68,21 +68,7 @@ download_and_extract() {
     
     if [[ -d "$extracted_folder" ]]; then
         echo "Found extracted folder: $extracted_folder"
-        
-        # Clear the /pg/apps/ directory before moving files
-        echo "Clearing /pg/apps/ directory..."
-        rm -rf /pg/apps/*
-        
-        # Move apps to /pg/apps
-        if [[ -d "$extracted_folder/mods/apps" ]]; then
-            echo "Moving apps to /pg/apps"
-            mv "$extracted_folder/mods/apps/"* /pg/apps/
-            chown -R 1000:1000 /pg/apps/
-            chmod -R +x /pg/apps/
-        else
-            echo "No apps directory found in $extracted_folder"
-        fi
-        
+                
         # Clear the /pg/scripts/ directory before moving files
         echo "Clearing /pg/scripts/ directory..."
         rm -rf /pg/scripts/*

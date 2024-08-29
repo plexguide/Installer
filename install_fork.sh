@@ -90,34 +90,6 @@ move_scripts() {
     fi
 }
 
-# Function to move apps from /pg/stage/mods/apps to /pg/apps/
-move_apps() {
-    echo "Clearing the /pg/apps/ directory..."
-
-    if [[ -d "/pg/apps/" ]]; then
-        rm -rf /pg/apps/*
-        rm -rf /pg/apps/.* 2>/dev/null || true
-        echo "Cleared /pg/apps/ directory."
-    fi
-
-    echo "Moving apps from /pg/stage/mods/apps to /pg/apps/..."
-
-    if [[ -d "/pg/stage/mods/apps" ]]; then
-        mv /pg/stage/mods/apps/* /pg/apps/
-
-        if [[ $? -eq 0 ]]; then
-            echo "Apps successfully moved to /pg/apps/."
-        else
-            echo "Failed to move apps. Please check the file paths and permissions."
-            exit 1
-        fi
-    else
-        echo "Source directory /pg/stage/mods/apps does not exist. No files to move."
-        menu_commands
-        exit 1
-    fi
-}
-
 # Function to check and install Docker if not installed
 check_and_install_docker() {
     if ! command -v docker &> /dev/null; then
