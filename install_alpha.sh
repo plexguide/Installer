@@ -77,7 +77,6 @@ move_scripts() {
         fi
     else
         echo "Source directory /pg/stage/mods/scripts does not exist. No files to move."
-        menu_commands
         exit 1
     fi
 }
