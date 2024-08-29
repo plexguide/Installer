@@ -8,6 +8,21 @@ CYAN="\033[0;36m"
 LIGHT_BLUE="\033[1;34m"
 NC="\033[0m" # No color
 
+# Function to check and install required packages
+check_and_install_packages() {
+    local packages=("jq" "git")
+    for package in "${packages[@]}"; do
+        if ! command -v "$package" &> /dev/null; then
+            echo "Installing missing package: $package..."
+            sudo apt-get update
+            sudo apt-get install -y "$package"
+        else
+            echo "Package $package is already installed."
+        fi
+    done
+}
+
+# Prepare the installer directory
 prepare_installer_directory() {
     local installer_dir="/pg/installer"
     
@@ -140,6 +155,7 @@ run_install_script() {
 
 # Main loop to display the interface and handle user input
 while true; do
+    check_and_install_packages  # Check for required packages at the start
     display_interface
     read -p "Enter your choice: " user_choice
     validate_choice "$user_choice"
