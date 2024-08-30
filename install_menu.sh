@@ -10,7 +10,10 @@ NC="\033[0m" # No color
 
 # Function to check and install required packages
 check_and_install_packages() {
-    local packages=("jq" "git")
+    # List of required packages
+    local packages=("jq" "git" "sed" "awk" "coreutils" "cut")
+    
+    # Loop through each package and install if not found
     for package in "${packages[@]}"; do
         if ! command -v "$package" &> /dev/null; then
             echo "Installing missing package: $package..."
