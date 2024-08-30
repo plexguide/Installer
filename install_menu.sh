@@ -11,7 +11,7 @@ NC="\033[0m" # No color
 # Function to check and install required packages
 check_and_install_packages() {
     # List of required packages
-    local packages=("jq" "git" "sed" "awk" "coreutils" "cut")
+    local packages=("jq" "git" "sed" "awk" "cut")
     
     # Loop through each package and install if not found
     for package in "${packages[@]}"; do
