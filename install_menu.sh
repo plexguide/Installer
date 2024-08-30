@@ -19,8 +19,6 @@ check_and_install_packages() {
             echo "Installing missing package: $package..."
             sudo apt-get update
             sudo apt-get install -y "$package"
-        else
-            echo "Package $package is already installed."
         fi
     done
 }
