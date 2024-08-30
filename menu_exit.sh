@@ -7,21 +7,26 @@ YELLOW="\033[1;33m"
 LIGHT_GREEN="\033[1;32m"
 CYAN="\033[0;36m"
 PURPLE="\033[0;35m"
-NC="\033[0m" # No color
+BOLD="\033[1m"
+NC="\033[0m"  # No color
 
 # Clear the screen at the start
 clear
 
-# Display information and commands
-echo "Visit github.com/plexguide/PlexGuide.com or plexguide.com"
+# Display the header
+echo -e "${BRIGHT_RED}${BOLD}═══════════════════════════════════════════════════════${NC}"
+echo -e "${BRIGHT_RED}${BOLD}       Visit github.com/plexguide/PlexGuide.com or plexguide.com${NC}"
+echo -e "${BRIGHT_RED}${BOLD}═══════════════════════════════════════════════════════${NC}"
 echo ""  # Space for separation
-echo "Commands:"
-echo -e "[${BRIGHT_RED}1${NC}] plexguide   |  Deploy PlexGuide"
-echo -e "[${ORANGE}2${NC}] pg          |  Deploy PlexGuide"
-echo -e "[${YELLOW}3${NC}] pgalpha     |  Install Latest Alpha Build"
-echo -e "[${LIGHT_GREEN}4${NC}] pgbeta      |  Install Latest Beta Build"
-echo -e "[${CYAN}5${NC}] pgfork      |  Deploy PGFork"
-echo -e "[${PURPLE}6${NC}] pginstall   |  Access the Installer Menu (Helps Repairs)"  # New command for Installer Menu
+
+# Display information and commands
+echo -e "${BOLD}Commands:${NC}"
+echo -e "[${BRIGHT_RED}1${NC}] plexguide   |  ${BOLD}Deploy PlexGuide${NC}"
+echo -e "[${ORANGE}2${NC}] pg          |  ${BOLD}Deploy PlexGuide${NC}"
+echo -e "[${YELLOW}3${NC}] pgalpha     |  ${BOLD}Install Latest Alpha Build${NC}"
+echo -e "[${LIGHT_GREEN}4${NC}] pgbeta      |  ${BOLD}Install Latest Beta Build${NC}"
+echo -e "[${CYAN}5${NC}] pgfork      |  ${BOLD}Deploy PGFork${NC}"
+echo -e "[${PURPLE}6${NC}] pginstall   |  ${BOLD}Access the Installer Menu (Helps Repairs)${NC}"
 echo ""  # Space before exiting
 
 # Exit the script
