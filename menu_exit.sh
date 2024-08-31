@@ -14,9 +14,9 @@ NC="\033[0m"  # No color
 clear
 
 # Display the header
-echo -e "${BRIGHT_RED}${BOLD}═══════════════════════════════════════════════════════${NC}"
-echo -e "${BRIGHT_RED}${BOLD}       Visit github.com/plexguide/PlexGuide.com or plexguide.com${NC}"
-echo -e "${BRIGHT_RED}${BOLD}═══════════════════════════════════════════════════════${NC}"
+echo -e "${BRIGHT_RED}${BOLD}════════════════════════════════════════════════════════${NC}"
+echo -e "${BRIGHT_RED}${BOLD}Visit github.com/plexguide/PlexGuide.com | plexguide.com${NC}"
+echo -e "${BRIGHT_RED}${BOLD}══════════════════════════════════════════════════════════${NC}"
 echo ""  # Space for separation
 
 # Display information and commands
