@@ -18,6 +18,9 @@ BRIGHT_BLUE="\033[1;34m"
 BRIGHT_MAGENTA="\033[1;35m"
 BRIGHT_CYAN="\033[1;36m"
 
+# Define the path to the support script
+SUPPORT_SCRIPT="/pg/installer/support.sh"
+
 # Function to check and install required packages
 check_and_install_packages() {
     local packages=("jq" "git" "sed" "awk" "cut")
