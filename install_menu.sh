@@ -18,8 +18,9 @@ BRIGHT_BLUE="\033[1;34m"
 BRIGHT_MAGENTA="\033[1;35m"
 BRIGHT_CYAN="\033[1;36m"
 
-# Define the path to the support script
+# Path to the support script
 SUPPORT_SCRIPT="/pg/installer/support.sh"
+SUPPORT_SCRIPT_URL="https://raw.githubusercontent.com/plexguide/Installer/v11/support.sh"
 
 # Function to check and install required packages
 check_and_install_packages() {
@@ -129,13 +130,20 @@ prompt_for_pin() {
 
 # Run the `support.sh` script with the provided version argument
 run_support_script() {
-    if [[ -f "$SUPPORT_SCRIPT" ]]; then
-        echo "Running support script for version: $1..."
-        bash "$SUPPORT_SCRIPT" "$1"
-    else
-        echo "Support script not found at $SUPPORT_SCRIPT. Please check your installation."
-        exit 1
+    if [[ ! -f "$SUPPORT_SCRIPT" ]]; then
+        echo "Support script not found at $SUPPORT_SCRIPT. Attempting to download it..."
+        curl -sL "$SUPPORT_SCRIPT_URL" -o "$SUPPORT_SCRIPT"
+
+        if [[ $? -ne 0 ]]; then
+            echo "Failed to download support script from $SUPPORT_SCRIPT_URL. Please check your network connection."
+            exit 1
+        fi
+
+        chmod +x "$SUPPORT_SCRIPT"
     fi
+
+    echo "Running support script for version: $1..."
+    bash "$SUPPORT_SCRIPT" "$1"
 }
 
 # Download and run the selected installation script for Fork
