@@ -8,26 +8,20 @@ create_command_symlinks() {
     declare -A commands=(
         ["plexguide"]="/pg/scripts/menu.sh"
         ["pg"]="/pg/scripts/menu.sh"
-        ["pgalpha"]="/pg/installer/support.sh alpha"
-        ["pgbeta"]="/pg/installer/support.sh beta"
+        ["pgalpha"]="/pg/installer/install_alpha.sh"
+        ["pgbeta"]="/pg/installer/install_beta.sh"
         ["pgfork"]="/pg/installer/install_fork.sh"
     )
 
     # Loop over the associative array to create symbolic links and set executable permissions
     for cmd in "${!commands[@]}"; do
-        # Handle pgalpha and pgbeta as wrappers to call support.sh with arguments
-        if [[ "$cmd" == "pgalpha" || "$cmd" == "pgbeta" ]]; then
-            cat << EOF | sudo tee "/usr/local/bin/$cmd" > /dev/null
-#!/bin/bash
-${commands[$cmd]}
-EOF
-        else
-            # Directly create the symbolic link for other commands
-            sudo ln -sf "${commands[$cmd]}" "/usr/local/bin/$cmd"
-        fi
+        # Create the symbolic link with force option to overwrite if it exists
+        sudo ln -sf "${commands[$cmd]}" "/usr/local/bin/$cmd"
 
-        # Set ownership and permissions for the command
+        # Set ownership to 1000:1000
         sudo chown 1000:1000 "/usr/local/bin/$cmd"
+
+        # Set the executable permission to 755 (read and execute for everyone)
         sudo chmod 755 "/usr/local/bin/$cmd"
     done
 
@@ -40,18 +34,26 @@ setup_pginstall_command() {
 
     # Define the URL of the install script
     local install_script_url="https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh"
+
+    # Define the directory and script name for temporary storage
     local tmp_dir="/pg/tmp"
     local tmp_script="$tmp_dir/install_menu_tmp.sh"
 
     # Ensure the temporary directory exists
     sudo mkdir -p "$tmp_dir"
 
-    # Write the pginstall script to download and execute the install script
+    # Write the pginstall script that will download the install script to the tmp directory and execute it
     cat << EOF | sudo tee /usr/local/bin/pginstall > /dev/null
 #!/bin/bash
 echo "Downloading and executing the PG installer..."
+
+# Download the installation script
 curl -sL "$install_script_url" -o "$tmp_script"
+
+# Set the script as executable
 chmod +x "$tmp_script"
+
+# Execute the script
 bash "$tmp_script"
 EOF
 
