@@ -6,34 +6,32 @@ GREEN="\033[0;32m"
 BOLD="\033[1m"
 NC="\033[0m" # No color
 
-# Function to check if /pg directory exists
+# Function to check if the /pg directory exists
 check_pg_directory() {
     if [[ ! -d "/pg" ]]; then
         echo -e "${RED}Warning: The /pg directory is missing.${NC}"
         echo "PlexGuide commands are unable to work because the /pg folder is missing."
-
-        # Generate random 4-digit codes for yes and no options
-        yes_code=$(printf "%04d" $((RANDOM % 10000)))
-        no_code=$(printf "%04d" $((RANDOM % 10000)))
-
         while true; do
-            read -p "$(echo -e "Do you want to repair this? Type [${GREEN}${BOLD}${yes_code}${NC}] for Yes or [${RED}${BOLD}${no_code}${NC}] for No: ")" choice
+            repair_code=$(printf "%04d" $((RANDOM % 10000)))
+            echo -e "Do you want to repair this? Type [${GREEN}${BOLD}${repair_code}${NC}] for Yes or [${RED}${BOLD}${repair_code}${NC}] for No: "
+            read -r choice
 
-            if [[ "$choice" == "$yes_code" ]]; then
+            if [[ "$choice" == "$repair_code" ]]; then
                 echo -e "${GREEN}Starting repair process...${NC}"
                 repair_pg_directory
                 break
-            elif [[ "$choice" == "$no_code" ]]; then
-                read -p "$(echo -e "${RED}Are you really sure? PlexGuide commands will stop working. Type [${GREEN}${BOLD}${yes_code}${NC}] for Yes or [${RED}${BOLD}${no_code}${NC}] for No: ")" confirm_choice
-                if [[ "$confirm_choice" == "$yes_code" ]]; then
+            elif [[ "$choice" == "$repair_code" ]]; then
+                echo -e "${RED}Are you really sure? PlexGuide commands will stop working.${NC}"
+                echo -e "Type [${GREEN}${BOLD}${repair_code}${NC}] for Yes or [${RED}${BOLD}${repair_code}${NC}] for No: "
+                read -r confirm_choice
+
+                if [[ "$confirm_choice" == "$repair_code" ]]; then
                     echo -e "${GREEN}Starting repair process...${NC}"
                     repair_pg_directory
                     break
-                elif [[ "$confirm_choice" == "$no_code" ]]; then
+                else
                     echo -e "${RED}Commands will stop working once you exit.${NC}"
                     exit 1
-                else
-                    echo -e "${RED}Invalid input. Please enter the correct 4-digit code.${NC}"
                 fi
             else
                 echo -e "${RED}Invalid input. Please enter the correct 4-digit code.${NC}"
@@ -51,7 +49,7 @@ repair_pg_directory() {
     local tmp_dir="/pg/tmp"
     local tmp_script="$tmp_dir/install_menu_tmp.sh"
     
-    # Ensure the /pg directory and tmp directory exist
+    # Ensure the /pg directory and tmp directory exists
     sudo mkdir -p "$tmp_dir"
     
     # Download the installation script
@@ -81,12 +79,6 @@ create_command_symlinks() {
 
     # Loop over the associative array to create symbolic links and set executable permissions
     for cmd in "${!commands[@]}"; do
-        # Check if the script path exists before creating the symlink
-        if [[ ! -f "${commands[$cmd]}" ]]; then
-            echo -e "${RED}Error: ${commands[$cmd]} not found. Cannot create symlink for $cmd.${NC}"
-            continue
-        fi
-
         # Create the symbolic link with force option to overwrite if it exists
         sudo ln -sf "${commands[$cmd]}" "/usr/local/bin/$cmd"
 
@@ -119,8 +111,37 @@ setup_pginstall_command() {
 #!/bin/bash
 echo "Downloading and executing the PG installer..."
 
-# Ensure the /pg directory exists before downloading
-sudo mkdir -p /pg/tmp
+# Check if /pg directory exists
+if [[ ! -d "/pg" ]]; then
+    echo -e "${RED}Warning: The /pg directory is missing.${NC}"
+    echo "PlexGuide commands are unable to work because the /pg folder is missing."
+    while true; do
+        repair_code=$(printf "%04d" $((RANDOM % 10000)))
+        echo -e "Do you want to repair this? Type [${GREEN}${BOLD}${repair_code}${NC}] for Yes or [${RED}${BOLD}${repair_code}${NC}] for No: "
+        read -r choice
+
+        if [[ "$choice" == "$repair_code" ]]; then
+            echo -e "${GREEN}Starting repair process...${NC}"
+            repair_pg_directory
+            break
+        elif [[ "$choice" == "$repair_code" ]]; then
+            echo -e "${RED}Are you really sure? PlexGuide commands will stop working.${NC}"
+            echo -e "Type [${GREEN}${BOLD}${repair_code}${NC}] for Yes or [${RED}${BOLD}${repair_code}${NC}] for No: "
+            read -r confirm_choice
+
+            if [[ "$confirm_choice" == "$repair_code" ]]; then
+                echo -e "${GREEN}Starting repair process...${NC}"
+                repair_pg_directory
+                break
+            else
+                echo -e "${RED}Commands will stop working once you exit.${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${RED}Invalid input. Please enter the correct 4-digit code.${NC}"
+        fi
+    done
+fi
 
 # Download the installation script
 curl -sL "$install_script_url" -o "$tmp_script"
@@ -145,3 +166,4 @@ create_command_symlinks
 setup_pginstall_command
 
 echo "Setup complete. You can now use the pginstall command to run the installer."
+
