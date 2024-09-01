@@ -51,7 +51,7 @@ repair_pg_directory() {
     local tmp_dir="/pg/tmp"
     local tmp_script="$tmp_dir/install_menu_tmp.sh"
     
-    # Ensure the /pg directory and tmp directory exists
+    # Ensure the /pg directory and tmp directory exist
     sudo mkdir -p "$tmp_dir"
     
     # Download the installation script
@@ -118,6 +118,9 @@ setup_pginstall_command() {
     cat << EOF | sudo tee /usr/local/bin/pginstall > /dev/null
 #!/bin/bash
 echo "Downloading and executing the PG installer..."
+
+# Ensure the /pg directory exists before downloading
+sudo mkdir -p /pg/tmp
 
 # Download the installation script
 curl -sL "$install_script_url" -o "$tmp_script"
