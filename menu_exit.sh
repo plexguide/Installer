@@ -21,12 +21,12 @@ echo ""  # Space for separation
 
 # Display information and commands
 echo -e "${BOLD}Commands:${NC}"
-echo -e "[${BRIGHT_RED}1${NC}] plexguide   |  ${BOLD}Deploy PlexGuide${NC}"
-echo -e "[${ORANGE}2${NC}] pg          |  ${BOLD}Deploy PlexGuide${NC}"
-echo -e "[${YELLOW}3${NC}] pgalpha     |  ${BOLD}Install Latest Alpha Build${NC}"
-echo -e "[${LIGHT_GREEN}4${NC}] pgbeta      |  ${BOLD}Install Latest Beta Build${NC}"
-echo -e "[${CYAN}5${NC}] pgfork      |  ${BOLD}Deploy PGFork${NC}"
-echo -e "[${PURPLE}6${NC}] pginstall   |  ${BOLD}Access the Installer Menu (Helps Repairs)${NC}"
+echo -e "[${BRIGHT_RED}1${NC}] plexguide   |  Deploy PlexGuide"
+echo -e "[${ORANGE}2${NC}] pg          |  Deploy PlexGuide"
+echo -e "[${YELLOW}3${NC}] pgalpha     |  Install Latest Alpha Build"
+echo -e "[${LIGHT_GREEN}4${NC}] pgbeta      |  Install Latest Beta Build"
+echo -e "[${CYAN}5${NC}] pgfork      |  Deploy PGFork"
+echo -e "[${PURPLE}6${NC}] pginstall   |  Access the Installer Menu (Helps Repairs)"
 echo ""  # Space before exiting
 
 # Exit the script
