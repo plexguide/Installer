@@ -1,5 +1,69 @@
 #!/bin/bash
 
+# ANSI color codes for formatting
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+BOLD="\033[1m"
+NC="\033[0m" # No color
+
+# Check if /pg directory exists
+check_pg_directory() {
+    if [[ ! -d "/pg" ]]; then
+        echo -e "${RED}Warning: The /pg directory is missing.${NC}"
+        echo "PlexGuide commands are unable to work because the /pg folder is missing."
+        while true; do
+            repair_code=$(printf "%04d" $((RANDOM % 10000)))
+            echo -e "Do you want to repair this? Type [${GREEN}${BOLD}${repair_code}${NC}] for Yes or [${RED}${BOLD}${repair_code}${NC}] for No: "
+            read -r choice
+
+            if [[ "$choice" == "$repair_code" ]]; then
+                echo -e "${GREEN}Starting repair process...${NC}"
+                repair_pg_directory
+                break
+            elif [[ "$choice" == "$repair_code" ]]; then
+                echo -e "${RED}Are you really sure? PlexGuide commands will stop working.${NC}"
+                echo -e "Type [${GREEN}${BOLD}${repair_code}${NC}] for Yes or [${RED}${BOLD}${repair_code}${NC}] for No: "
+                read -r confirm_choice
+
+                if [[ "$confirm_choice" == "$repair_code" ]]; then
+                    echo -e "${GREEN}Starting repair process...${NC}"
+                    repair_pg_directory
+                    break
+                else
+                    echo -e "${RED}Commands will stop working once you exit.${NC}"
+                    exit 1
+                fi
+            else
+                echo -e "${RED}Invalid input. Please enter the correct 4-digit code.${NC}"
+            fi
+        done
+    fi
+}
+
+# Function to repair /pg directory
+repair_pg_directory() {
+    # Define the URL of the install script
+    local install_script_url="https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh"
+    
+    # Define the directory and script name for temporary storage
+    local tmp_dir="/pg/tmp"
+    local tmp_script="$tmp_dir/install_menu_tmp.sh"
+    
+    # Ensure the /pg directory and tmp directory exists
+    sudo mkdir -p "$tmp_dir"
+    
+    # Download the installation script
+    echo "Downloading the installation script..."
+    curl -sL "$install_script_url" -o "$tmp_script"
+    
+    # Set the script as executable
+    chmod +x "$tmp_script"
+    
+    # Execute the installation script
+    echo "Executing the installation script..."
+    bash "$tmp_script"
+}
+
 # Function to create symbolic links for command scripts
 create_command_symlinks() {
     echo "Creating command symlinks..."
@@ -65,6 +129,7 @@ EOF
 }
 
 # Main script execution
+check_pg_directory
 create_command_symlinks
 setup_pginstall_command
 
