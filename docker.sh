@@ -76,10 +76,14 @@ if [ "$DOCKER_INSTALLED" = false ]; then
         sudo apt-get install -y docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin docker-compose-plugin
     fi
 
+    # Start and enable Docker service
+    sudo systemctl start docker
+    sudo systemctl enable docker
+
     # Verify Docker installation
     sudo systemctl status docker --no-pager
 
-    echo "Docker has been installed successfully."
+    echo "Docker has been installed and started successfully."
 else
     echo "Skipping Docker installation as it's already installed."
 fi
