@@ -61,7 +61,7 @@ if [ "$DOCKER_INSTALLED" = false ]; then
     sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 
     # Add Docker's official GPG key (force overwrite if it exists)
-    curl -fsSL https://download.docker.com/linux/$OS_NAME/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    curl -fsSL https://download.docker.com/linux/$OS_NAME/gpg | sudo tee /usr/share/keyrings/docker-archive-keyring.gpg > /dev/null
 
     # Add Docker's official repository
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$OS_NAME $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
@@ -76,10 +76,17 @@ if [ "$DOCKER_INSTALLED" = false ]; then
         sudo apt-get install -y docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin docker-compose-plugin
     fi
 
-    # Verify Docker installation
-    sudo systemctl status docker --no-pager
+    # Enable and start Docker service
+    sudo systemctl enable docker
+    sudo systemctl start docker
 
-    echo "Docker has been installed successfully."
+    # Verify Docker installation
+    if sudo systemctl status docker --no-pager; then
+        echo "Docker has been installed and started successfully."
+    else
+        echo "Failed to start Docker service. Please check the installation logs and try again."
+        exit 1
+    fi
 else
     echo "Skipping Docker installation as it's already installed."
 fi
