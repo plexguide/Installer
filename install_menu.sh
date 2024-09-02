@@ -71,8 +71,6 @@ check_and_install_packages() {
         - awk
         - cut
 EOF
-
-    echo "Running Ansible playbook to check and install required packages..."
     ansible-playbook "/pg/stage/install_packages_playbook.yml" -i localhost,
 }
 
