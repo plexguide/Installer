@@ -42,8 +42,8 @@ else
     DOCKER_INSTALLED=false
 fi
 
-# Check if Docker Compose is already installed
-if command_exists docker-compose; then
+# Check if Docker Compose is already installed (handles both standalone and plugin)
+if command_exists docker-compose || command_exists docker compose; then
     echo "Docker Compose is already installed. Skipping Docker Compose installation."
     COMPOSE_INSTALLED=true
 else
@@ -105,15 +105,33 @@ else
 fi
 
 if [ "$COMPOSE_INSTALLED" = false ]; then
-    # Install Docker Compose
-    COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
-    sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
+    # Install Docker Compose (both standalone and plugin method)
+    if ! command_exists docker compose; then
+        # Use Docker plugin method for Docker Compose v2
+        echo "Installing Docker Compose as a Docker plugin..."
+        sudo apt-get install -y docker-compose-plugin
+    fi
 
     # Verify Docker Compose installation
-    docker-compose --version
+    if docker compose version; then
+        echo "Docker Compose has been installed successfully using the Docker plugin."
+    else
+        echo "Failed to install Docker Compose using the Docker plugin. Attempting standalone installation..."
 
-    echo "Docker Compose has been installed successfully."
+        # Install Docker Compose standalone binary
+        COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+        sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+
+        # Verify Docker Compose installation
+        docker-compose --version
+        if [ $? -eq 0 ]; then
+            echo "Docker Compose standalone has been installed successfully."
+        else
+            echo "Docker Compose installation failed. Please check the installation steps and try again."
+            exit 1
+        fi
+    fi
 else
     echo "Skipping Docker Compose installation as it's already installed."
 fi
