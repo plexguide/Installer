@@ -6,41 +6,14 @@ GREEN="\033[0;32m"
 ORANGE="\033[0;33m"
 NC="\033[0m" # No color
 
-# Function to ensure /pg/stage directory exists
-ensure_stage_directory() {
-    if [[ ! -d "/pg/stage" ]]; then
-        mkdir -p /pg/stage
-        echo "Created /pg/stage directory."
-    fi
-}
-
-# Function to check and install unzip if not present using Ansible
+# Function to check and install unzip if not present
 check_and_install_unzip() {
-
-    # Ensure the /pg/stage directory exists
-    ensure_stage_directory
-
-    # Generate the Ansible playbook
-    cat <<EOF > "/pg/stage/install_unzip_playbook.yml"
----
-- name: Check and install unzip if not present
-  hosts: localhost
-  gather_facts: no
-  tasks:
-    - name: Check if unzip is installed
-      command: which unzip
-      register: unzip_check
-      ignore_errors: true
-
-    - name: Install unzip if not found
-      apt:
-        name: unzip
-        state: present
-      when: unzip_check.rc != 0
-EOF
-
-    echo "Running Ansible playbook to check and install unzip..."
-    ansible-playbook "/pg/stage/install_unzip_playbook.yml" -i localhost, --connection=local
+    if ! command -v unzip &> /dev/null; then
+        echo "unzip not found. Installing unzip..."
+        sudo apt-get update
+        sudo apt-get install -y unzip
+        echo "unzip has been installed."
+    fi
 }
 
 # Function to check and install Docker if not installed
@@ -58,36 +31,28 @@ fetch_releases() {
     curl -s https://api.github.com/repos/plexguide/PlexGuide.com/releases | jq -r '.[].tag_name' | grep -E '^11\.[0-9]\.B[0-9]+' | sort -r | head -n 50
 }
 
-# Function to create directories with the correct permissions using Ansible
+# Function to create directories with the correct permissions
 create_directories() {
+    echo "Creating necessary directories..."
 
-    # Ensure the /pg/stage directory exists
-    ensure_stage_directory
+    directories=(
+        "/pg/config"
+        "/pg/scripts"
+        "/pg/apps"
+        "/pg/stage"
+        "/pg/installer"
+    )
 
-    # Generate the Ansible playbook
-    cat <<EOF > "/pg/stage/create_directories_playbook.yml"
----
-- name: Create necessary directories and set permissions
-  hosts: localhost
-  gather_facts: no
-  tasks:
-    - name: Ensure directories exist with proper ownership and permissions
-      file:
-        path: "{{ item }}"
-        state: directory
-        owner: 1000
-        group: 1000
-        mode: '0755'
-      loop:
-        - /pg/config
-        - /pg/scripts
-        - /pg/apps
-        - /pg/stage
-        - /pg/installer
-EOF
-
-    echo "Running Ansible playbook to create directories..."
-    ansible-playbook "/pg/stage/create_directories_playbook.yml" -i localhost, --connection=local
+    for dir in "${directories[@]}"; do
+        if [[ ! -d "$dir" ]]; then
+            mkdir -p "$dir"
+            echo "Created $dir"
+        else
+            echo "$dir already exists"
+        fi
+        chown -R 1000:1000 "$dir"
+        chmod -R +x "$dir"
+    done
 }
 
 # Function to download and extract the selected release
