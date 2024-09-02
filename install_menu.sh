@@ -52,17 +52,28 @@ install_ansible() {
 
 # Function to check and install required packages
 check_and_install_packages() {
-    # List of required packages
-    local packages=("jq" "git" "sed" "awk" "cut")
-    
-    # Loop through each package and install if not found
-    for package in "${packages[@]}"; do
-        if ! command -v "$package" &> /dev/null; then
-            echo "Installing missing package: $package..."
-            sudo apt-get update
-            sudo apt-get install -y "$package"
-        fi
-    done
+
+    # Generate the Ansible playbook
+    cat <<EOF > "/pg/stage/install_packages_playbook.yml"
+---
+- name: Check and install required packages
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Ensure required packages are installed
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - jq
+        - git
+        - sed
+        - awk
+        - cut
+EOF
+
+    echo "Running Ansible playbook to check and install required packages..."
+    ansible-playbook "/pg/stage/install_packages_playbook.yml" -i localhost,
 }
 
 # Prepare the installer directory
