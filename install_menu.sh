@@ -76,6 +76,16 @@ display_interface() {
     echo ""
 }
 
+# Function to check and install Docker if not installed
+check_and_install_docker() {
+    if ! command -v docker &> /dev/null; then
+        echo -e "\e[38;5;196mD\e[38;5;202mO\e[38;5;214mC\e[38;5;226mK\e[38;5;118mE\e[38;5;51mR \e[38;5;201mI\e[38;5;141mS \e[38;5;93mI\e[38;5;87mN\e[38;5;129mS\e[38;5;166mT\e[38;5;208mA\e[38;5;226mL\e[38;5;190mL\e[38;5;82mI\e[38;5;40mN\e[38;5;32mG\e[0m"
+        sleep .5
+        chmod +x /pg/installer/docker.sh
+        bash /pg/installer/docker.sh
+    fi
+}
+
 # Function to validate the user's choice
 validate_choice() {
     local choice="$1"
@@ -157,6 +167,7 @@ run_install_script() {
 # Main loop to display the interface and handle user input
 while true; do
     check_and_install_packages  # Check for required packages at the start
+    check_and_install_docker    # Check and install Docker if needed
     display_interface
     read -p "Enter your choice: " user_choice
     validate_choice "$user_choice"
