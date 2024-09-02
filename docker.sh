@@ -124,8 +124,7 @@ if [ "$COMPOSE_INSTALLED" = false ]; then
         sudo chmod +x /usr/local/bin/docker-compose
 
         # Verify Docker Compose installation
-        docker-compose --version
-        if [ $? -eq 0 ]; then
+        if docker-compose --version; then
             echo "Docker Compose standalone has been installed successfully."
         else
             echo "Docker Compose installation failed. Please check the installation steps and try again."
