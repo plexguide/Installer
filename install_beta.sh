@@ -33,26 +33,32 @@ fetch_releases() {
 
 # Function to create directories with the correct permissions
 create_directories() {
-    echo "Creating necessary directories..."
 
-    directories=(
-        "/pg/config"
-        "/pg/scripts"
-        "/pg/apps"
-        "/pg/stage"
-        "/pg/installer"
-    )
 
-    for dir in "${directories[@]}"; do
-        if [[ ! -d "$dir" ]]; then
-            mkdir -p "$dir"
-            echo "Created $dir"
-        else
-            echo "$dir already exists"
-        fi
-        chown -R 1000:1000 "$dir"
-        chmod -R +x "$dir"
-    done
+    local playbook_file="/pg/stage/create_directories_playbook.yml"
+    # Generate the Ansible playbook
+    cat <<EOF > "$playbook_file"
+---
+- name: Create necessary directories and set permissions
+  hosts: localhost
+  tasks:
+    - name: Ensure directories exist with proper ownership and permissions
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: 1000
+        group: 1000
+        mode: '0755'
+      loop:
+        - /pg/config
+        - /pg/scripts
+        - /pg/apps
+        - /pg/stage
+        - /pg/installer
+EOF
+
+    echo "Running Ansible playbook to create directories..."
+    ansible-playbook "$playbook_file"
 }
 
 # Function to download and extract the selected release
