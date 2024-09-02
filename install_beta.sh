@@ -16,13 +16,12 @@ ensure_stage_directory() {
 
 # Function to check and install unzip if not present using Ansible
 check_and_install_unzip() {
-    local playbook_file="/pg/stage/install_unzip_playbook.yml"
 
     # Ensure the /pg/stage directory exists
     ensure_stage_directory
 
     # Generate the Ansible playbook
-    cat <<EOF > "$playbook_file"
+    cat <<EOF > "/pg/stage/install_unzip_playbook.yml"
 ---
 - name: Check and install unzip if not present
   hosts: localhost
@@ -41,7 +40,7 @@ check_and_install_unzip() {
 EOF
 
     echo "Running Ansible playbook to check and install unzip..."
-    ansible-playbook "$playbook_file" -i localhost, --connection=local
+    ansible-playbook "/pg/stage/install_unzip_playbook.yml" -i localhost, --connection=local
 }
 
 # Function to check and install Docker if not installed
@@ -61,13 +60,12 @@ fetch_releases() {
 
 # Function to create directories with the correct permissions using Ansible
 create_directories() {
-    local playbook_file="/pg/stage/create_directories_playbook.yml"
 
     # Ensure the /pg/stage directory exists
     ensure_stage_directory
 
     # Generate the Ansible playbook
-    cat <<EOF > "$playbook_file"
+    cat <<EOF > "/pg/stage/create_directories_playbook.yml"
 ---
 - name: Create necessary directories and set permissions
   hosts: localhost
@@ -89,7 +87,7 @@ create_directories() {
 EOF
 
     echo "Running Ansible playbook to create directories..."
-    ansible-playbook "$playbook_file" -i localhost, --connection=local
+    ansible-playbook "/pg/stage/create_directories_playbook.yml" -i localhost, --connection=local
 }
 
 # Function to download and extract the selected release
