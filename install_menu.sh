@@ -8,6 +8,48 @@ CYAN="\033[0;36m"
 LIGHT_BLUE="\033[1;34m"
 NC="\033[0m" # No color
 
+# Function to install Ansible
+install_ansible() {
+    if ! command -v ansible &> /dev/null; then
+        echo -e "${GREEN}Ansible not found. Installing Ansible...${NC}"
+        # Detect the OS and VERSION
+        if [ -f /etc/os-release ]; then
+            . /etc/os-release
+        else
+            echo -e "${RED}Cannot determine the operating system. Exiting...${NC}"
+            exit 1
+        fi
+
+        # Check if the OS is Ubuntu or Debian and call the appropriate function
+        if [[ "$ID" == "ubuntu" && ( "$VERSION_ID" == "22.04" || "$VERSION_ID" == "24.04" ) ]]; then
+            sudo apt update -y
+            sudo apt install -y software-properties-common
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt update -y
+            sudo apt install -y ansible
+        elif [[ "$ID" == "debian" && "$VERSION_ID" == "12" ]]; then
+            sudo apt update -y
+            sudo apt install -y software-properties-common
+            sudo apt install -y ansible
+        else
+            echo -e "${RED}This script supports only Ubuntu 22.04, Ubuntu 24.04, and Debian 12. Exiting...${NC}"
+            exit 1
+        fi
+
+        echo -e "${GREEN}Ansible installation complete. Verifying the installation...${NC}"
+        ansible --version
+
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}Ansible has been installed successfully!${NC}"
+        else
+            echo -e "${RED}Ansible installation failed. Please check the error messages above.${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}Ansible is already installed.${NC}"
+    fi
+}
+
 # Function to check and install required packages
 check_and_install_packages() {
     # List of required packages
@@ -156,6 +198,7 @@ run_install_script() {
 
 # Main loop to display the interface and handle user input
 while true; do
+    install_ansible  # Install Ansible if not present
     check_and_install_packages  # Check for required packages at the start
     display_interface
     read -p "Enter your choice: " user_choice
