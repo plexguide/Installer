@@ -6,9 +6,20 @@ GREEN="\033[0;32m"
 ORANGE="\033[0;33m"
 NC="\033[0m" # No color
 
-# Function to check and install unzip if not present
+# Function to ensure /pg/stage directory exists
+ensure_stage_directory() {
+    if [[ ! -d "/pg/stage" ]]; then
+        mkdir -p /pg/stage
+        echo "Created /pg/stage directory."
+    fi
+}
+
+# Function to check and install unzip if not present using Ansible
 check_and_install_unzip() {
     local playbook_file="/pg/stage/install_unzip_playbook.yml"
+
+    # Ensure the /pg/stage directory exists
+    ensure_stage_directory
 
     # Generate the Ansible playbook
     cat <<EOF > "$playbook_file"
@@ -30,8 +41,7 @@ check_and_install_unzip() {
 EOF
 
     echo "Running Ansible playbook to check and install unzip..."
-    ansible-playbook "$playbook_file" -i localhost,
-EOF
+    ansible-playbook "$playbook_file" -i localhost, --connection=local
 }
 
 # Function to check and install Docker if not installed
@@ -49,9 +59,12 @@ fetch_releases() {
     curl -s https://api.github.com/repos/plexguide/PlexGuide.com/releases | jq -r '.[].tag_name' | grep -E '^11\.[0-9]\.B[0-9]+' | sort -r | head -n 50
 }
 
-# Function to create directories with the correct permissions
+# Function to create directories with the correct permissions using Ansible
 create_directories() {
     local playbook_file="/pg/stage/create_directories_playbook.yml"
+
+    # Ensure the /pg/stage directory exists
+    ensure_stage_directory
 
     # Generate the Ansible playbook
     cat <<EOF > "$playbook_file"
@@ -76,7 +89,7 @@ create_directories() {
 EOF
 
     echo "Running Ansible playbook to create directories..."
-    ansible-playbook "$playbook_file" -i localhost,
+    ansible-playbook "$playbook_file" -i localhost, --connection=local
 }
 
 # Function to download and extract the selected release
