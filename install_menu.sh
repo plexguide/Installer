@@ -174,10 +174,13 @@ run_install_script() {
     fi
 }
 
+# To execute at the start
+check_and_install_packages
+check_and_install_docker   
+
 # Main loop to display the interface and handle user input
 while true; do
-    check_and_install_packages  # Check for required packages at the start
-    check_and_install_docker    # Check and install Docker if needed
+ # Check and install Docker if needed
     display_interface
     read -p "Enter your choice: " user_choice
     validate_choice "$user_choice"
