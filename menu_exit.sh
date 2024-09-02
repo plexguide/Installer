@@ -25,7 +25,7 @@ echo -e "[${BRIGHT_RED}1${NC}] plexguide   |  Deploy PlexGuide"
 echo -e "[${ORANGE}2${NC}] pg          |  Deploy PlexGuide"
 echo -e "[${YELLOW}3${NC}] pgalpha     |  Install Latest Alpha Build"
 echo -e "[${LIGHT_GREEN}4${NC}] pgbeta      |  Install Latest Beta Build"
-echo -e "[${CYAN}5${NC}] pgfork      |  Deploy PGFork"
+echo -e "[${CYAN}5${NC}] pgfork      |  Not Operational Yet"
 echo -e "[${PURPLE}6${NC}] pginstall   |  Access the Installer Menu (Helps Repairs)"
 echo ""  # Space before exiting
 
