@@ -8,12 +8,28 @@ NC="\033[0m" # No color
 
 # Function to check and install unzip if not present
 check_and_install_unzip() {
-    if ! command -v unzip &> /dev/null; then
-        echo "unzip not found. Installing unzip..."
-        sudo apt-get update
-        sudo apt-get install -y unzip
-        echo "unzip has been installed."
-    fi
+    local playbook_file="/pg/stage/install_unzip_playbook.yml"
+
+    # Generate the Ansible playbook
+    cat <<EOF > "$playbook_file"
+---
+- name: Check and install unzip if not present
+  hosts: localhost
+  tasks:
+    - name: Check if unzip is installed
+      command: which unzip
+      register: unzip_check
+      ignore_errors: true
+
+    - name: Install unzip if not found
+      apt:
+        name: unzip
+        state: present
+      when: unzip_check.rc != 0
+EOF
+
+    echo "Running Ansible playbook to check and install unzip..."
+    ansible-playbook "$playbook_file"
 }
 
 # Function to check and install Docker if not installed
