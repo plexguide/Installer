@@ -26,6 +26,11 @@ check_and_install_docker() {
     fi
 }
 
+# Function to fetch all releases from GitHub and filter them
+fetch_releases() {
+    curl -s https://api.github.com/repos/plexguide/PlexGuide.com/releases | jq -r '.[].tag_name' | grep -E '^11\.[0-9]\.B[0-9]+' | sort -r | head -n 50
+}
+
 # Function to create directories with the correct permissions
 create_directories() {
     echo "Creating necessary directories..."
@@ -50,53 +55,43 @@ create_directories() {
     done
 }
 
-# Function to dynamically create and execute an Ansible playbook
-ansible_download_and_extract() {
+# Function to download and extract the selected release
+download_and_extract() {
     local selected_version="$1"
-    local playbook_file="/pg/stage/download_extract_playbook.yml"
+    local url="https://github.com/plexguide/PlexGuide.com/archive/refs/tags/${selected_version}.zip"
+    
+    echo "Downloading and extracting ${selected_version}..."
+    curl -L -o /pg/stage/release.zip "$url"
+    
+    unzip -o /pg/stage/release.zip -d /pg/stage/
     local extracted_folder="/pg/stage/PlexGuide.com-${selected_version}"
-    local release_url="https://github.com/plexguide/PlexGuide.com/archive/refs/tags/${selected_version}.zip"
-
-    # Create the Ansible playbook file
-    cat <<EOF > "$playbook_file"
----
-- name: Download and extract PlexGuide release
-  hosts: localhost
-  tasks:
-    - name: Download the selected release
-      get_url:
-        url: $release_url
-        dest: /pg/stage/release.zip
-
-    - name: Extract the release zip
-      unarchive:
-        src: /pg/stage/release.zip
-        dest: /pg/stage/
-        remote_src: yes
-
-    - name: Clear /pg/scripts/ directory
-      shell: rm -rf /pg/scripts/*
-
-    - name: Move extracted scripts to /pg/scripts/
-      shell: |
+    
+    if [[ -d "$extracted_folder" ]]; then
+        echo "Found extracted folder: $extracted_folder"
+                
+        # Clear the /pg/scripts/ directory before moving files
+        echo "Clearing /pg/scripts/ directory..."
+        rm -rf /pg/scripts/*
+        
+        # Move scripts to /pg/scripts
         if [[ -d "$extracted_folder/mods/scripts" ]]; then
-          mv $extracted_folder/mods/scripts/* /pg/scripts/
+            echo "Moving scripts to /pg/scripts"
+            mv "$extracted_folder/mods/scripts/"* /pg/scripts/
+            chown -R 1000:1000 /pg/scripts/
+            chmod -R +x /pg/scripts/
+        else
+            echo "No scripts directory found in $extracted_folder"
         fi
 
-    - name: Set permissions on /pg/scripts/
-      file:
-        path: /pg/scripts/
-        owner: 1000
-        group: 1000
-        mode: '0755'
-        recurse: yes
-
-    - name: Clear /pg/stage/ directory
-      shell: rm -rf /pg/stage/*
-EOF
-
-    echo "Running Ansible playbook to download and extract ${selected_version}..."
-    ansible-playbook "$playbook_file"
+        # Clear the /pg/stage directory after moving the files
+        rm -rf /pg/stage/*
+        echo "Cleared /pg/stage directory after moving files."
+        
+    else
+        echo "Extracted folder $extracted_folder not found!"
+    fi
+    
+    echo "Files for ${selected_version} have been processed."
 }
 
 # Function to update the version in the config file
@@ -118,33 +113,73 @@ update_config_version() {
     echo "VERSION has been set to $selected_version in $config_file"
 }
 
+# Function to display releases
+display_releases() {
+    releases="$1"
+    echo -e "${RED}PG Beta Releases:${NC}"
+    echo ""
+    line_length=0
+    first_release=true
+    for release in $releases; do
+        if (( line_length + ${#release} + 1 > 80 )); then
+            echo ""
+            line_length=0
+        fi
+        if $first_release; then
+            echo -n -e "${ORANGE}$release${NC} "
+            first_release=false
+        else
+            echo -n "$release "
+        fi
+        line_length=$((line_length + ${#release} + 1))
+    done
+    echo "" # New line after displaying all releases
+}
+
+show_exit() {
+    bash /pg/installer/menu_exit.sh
+}
+
 # Main logic
 while true; do
     clear
-    selected_version="11.0.B01"  # Example version for demonstration
+    releases=$(fetch_releases)
+    
+    if [[ -z "$releases" ]]; then
+        echo "No releases found starting with '11' and containing 'B'."
+        exit 1
+    fi
 
+    display_releases "$releases"
     echo ""
-    random_pin=$(printf "%04d" $((RANDOM % 10000)))
-    while true; do
-        read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
-        if [[ "$response" == "$random_pin" ]]; then
-            check_and_install_unzip
-            check_and_install_docker
+    read -p "Which version do you want to install? " selected_version
 
-            create_directories
-            ansible_download_and_extract "$selected_version"
-            update_config_version "$selected_version"
+    if echo "$releases" | grep -q "^${selected_version}$"; then
+        echo ""
+        random_pin=$(printf "%04d" $((RANDOM % 10000)))
+        while true; do
+            read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
+            if [[ "$response" == "$random_pin" ]]; then
+                check_and_install_unzip
+                check_and_install_docker
 
-            # Source the commands.sh script and run the create_command_symlinks function
-            source /pg/installer/commands.sh
-            create_command_symlinks
-            show_exit
-            exit 0
-        elif [[ "${response,,}" == "z" ]]; then
-            echo "Installation canceled."
-            exit 0
-        else
-            echo "Invalid input. Please try again."
-        fi
-    done
+                create_directories
+                download_and_extract "$selected_version"
+                update_config_version "$selected_version"
+
+                # Source the commands.sh script and run the create_command_symlinks function
+                source /pg/installer/commands.sh
+                create_command_symlinks
+                show_exit
+                exit 0
+            elif [[ "${response,,}" == "z" ]]; then
+                echo "Installation canceled."
+                exit 0
+            else
+                echo "Invalid input. Please try again."
+            fi
+        done
+    else
+        echo "Invalid version. Please select a valid version from the list."
+    fi
 done
