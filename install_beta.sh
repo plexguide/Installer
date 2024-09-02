@@ -15,6 +15,7 @@ check_and_install_unzip() {
 ---
 - name: Check and install unzip if not present
   hosts: localhost
+  gather_facts: no
   tasks:
     - name: Check if unzip is installed
       command: which unzip
@@ -29,7 +30,8 @@ check_and_install_unzip() {
 EOF
 
     echo "Running Ansible playbook to check and install unzip..."
-    ansible-playbook "$playbook_file"
+    ansible-playbook "$playbook_file" -i localhost,
+EOF
 }
 
 # Function to check and install Docker if not installed
@@ -49,14 +51,14 @@ fetch_releases() {
 
 # Function to create directories with the correct permissions
 create_directories() {
-
-
     local playbook_file="/pg/stage/create_directories_playbook.yml"
+
     # Generate the Ansible playbook
     cat <<EOF > "$playbook_file"
 ---
 - name: Create necessary directories and set permissions
   hosts: localhost
+  gather_facts: no
   tasks:
     - name: Ensure directories exist with proper ownership and permissions
       file:
@@ -74,7 +76,7 @@ create_directories() {
 EOF
 
     echo "Running Ansible playbook to create directories..."
-    ansible-playbook "$playbook_file"
+    ansible-playbook "$playbook_file" -i localhost,
 }
 
 # Function to download and extract the selected release
