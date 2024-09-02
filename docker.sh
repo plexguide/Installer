@@ -42,17 +42,9 @@ else
     DOCKER_INSTALLED=false
 fi
 
-# Check if Docker Compose is already installed (handles both standalone and plugin)
-if command_exists docker-compose || command_exists docker compose; then
-    echo "Docker Compose is already installed. Skipping Docker Compose installation."
-    COMPOSE_INSTALLED=true
-else
-    COMPOSE_INSTALLED=false
-fi
-
-# If both Docker and Docker Compose are installed, exit
-if [ "$DOCKER_INSTALLED" = true ] && [ "$COMPOSE_INSTALLED" = true ]; then
-    echo "Both Docker and Docker Compose are already installed. Nothing to do."
+# If Docker is already installed, exit
+if [ "$DOCKER_INSTALLED" = true ]; then
+    echo "Docker is already installed. Nothing to do."
     exit 0
 fi
 
@@ -84,9 +76,9 @@ if [ "$DOCKER_INSTALLED" = false ]; then
 
     # Install Docker based on the specified version
     if [ "$DOCKER_VERSION" = "latest" ]; then
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
     else
-        sudo apt-get install -y docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin docker-compose-plugin
+        sudo apt-get install -y docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-buildx-plugin
     fi
 
     # Enable and start Docker service
@@ -104,35 +96,4 @@ else
     echo "Skipping Docker installation as it's already installed."
 fi
 
-if [ "$COMPOSE_INSTALLED" = false ]; then
-    # Install Docker Compose (both standalone and plugin method)
-    if ! command_exists docker compose; then
-        # Use Docker plugin method for Docker Compose v2
-        echo "Installing Docker Compose as a Docker plugin..."
-        sudo apt-get install -y docker-compose-plugin
-    fi
-
-    # Verify Docker Compose installation
-    if docker compose version; then
-        echo "Docker Compose has been installed successfully using the Docker plugin."
-    else
-        echo "Failed to install Docker Compose using the Docker plugin. Attempting standalone installation..."
-
-        # Install Docker Compose standalone binary
-        COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
-        sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-
-        # Verify Docker Compose installation
-        if docker-compose --version; then
-            echo "Docker Compose standalone has been installed successfully."
-        else
-            echo "Docker Compose installation failed. Please check the installation steps and try again."
-            exit 1
-        fi
-    fi
-else
-    echo "Skipping Docker Compose installation as it's already installed."
-fi
-
-echo "Installation process completed."
+echo "Docker installation process completed."

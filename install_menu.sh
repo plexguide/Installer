@@ -79,20 +79,24 @@ display_interface() {
 # Function to check and install Docker if not installed
 check_and_install_docker() {
     if ! command -v docker &> /dev/null; then
-        echo -e "\e[38;5;196mD\e[38;5;202mO\e[38;5;214mC\e[38;5;226mK\e[38;5;118mE\e[38;5;51mR \e[38;5;201mI\e[38;5;141mS \e[38;5;93mI\e[38;5;87mN\e[38;5;129mS\e[38;5;166mT\e[38;5;208mA\e[38;5;226mL\e[38;5;190mL\e[38;5;82mI\e[38;5;40mN\e[38;5;32mG\e[0m"
-        sleep 0.5
+        echo -e "${GREEN}Installing Docker...${NC}"
         
-        # Create the /pg/installer directory if it doesn't exist
+        # Basic Commands
         mkdir -p /pg/installer
-
-        # Download the Docker installation script from GitHub
         curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/docker.sh -o /pg/installer/docker.sh
-
-        # Make the script executable
         chmod +x /pg/installer/docker.sh
-
-        # Execute the Docker installation script
         bash /pg/installer/docker.sh
+    fi
+}
+
+# Function to check and install Docker if not installed
+check_and_install_compose() {
+    if ! command -v docker-compose &> /dev/null; then
+        echo -e "${GREEN}Installing Docker-Compose...${NC}"
+        mkdir -p /pg/installer
+        curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/compose.sh -o /pg/installer/compose.sh
+        chmod +x /pg/installer/compose.sh
+        bash /pg/installer/compose.sh
     fi
 }
 
@@ -176,7 +180,8 @@ run_install_script() {
 
 # To execute at the start
 check_and_install_packages
-check_and_install_docker   
+check_and_install_docker
+check_and_install_compose
 
 # Main loop to display the interface and handle user input
 while true; do
