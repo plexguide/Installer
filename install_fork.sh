@@ -161,7 +161,6 @@ deploy_pg_fork() {
             download_repository
             move_scripts
             move_apps
-            check_and_install_docker
             set_config_version
             menu_commands
             break
