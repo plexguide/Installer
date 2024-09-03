@@ -25,7 +25,7 @@ set_config_version() {
         echo 'VERSION="PG Alpha"' > "$CONFIG_VERSION"
     fi
 
-    version_string="PG Fork - $user/$repo ($branch)"
+    version_string="Fork - $user/$repo ($branch)"
 
     # Use awk to replace the entire line containing VERSION
     awk -v new_version="$version_string" '/^VERSION=/{$0="VERSION=\"" new_version "\""} 1' "$CONFIG_VERSION" > "${CONFIG_VERSION}.tmp" && mv "${CONFIG_VERSION}.tmp" "$CONFIG_VERSION"
