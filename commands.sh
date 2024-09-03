@@ -8,7 +8,7 @@ create_command_symlinks() {
     declare -A commands=(
         ["plexguide"]="/pg/scripts/menu.sh"
         ["pg"]="/pg/scripts/menu.sh"
-        ["pgalpha"]="/pg/installer/install_alpha.sh"
+        ["pgdev"]="/pg/installer/install_dev.sh"
         ["pgbeta"]="/pg/installer/install_beta.sh"
         ["pgfork"]="/pg/installer/install_fork.sh"
     )

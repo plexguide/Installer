@@ -89,12 +89,12 @@ set_config_version() {
     fi
 
     if grep -q "^VERSION=" "$CONFIG_FILE"; then
-        sed -i 's/^VERSION=.*/VERSION="PG Alpha"/' "$CONFIG_FILE"
+        sed -i 's/^VERSION=.*/VERSION="Dev"/' "$CONFIG_FILE"
     else
-        echo 'VERSION="PG Alpha"' >> "$CONFIG_FILE"
+        echo 'VERSION="PG Dev"' >> "$CONFIG_FILE"
     fi
 
-    echo "VERSION has been set to PG Alpha in $CONFIG_FILE"
+    echo "VERSION has been set to PG Dev in $CONFIG_FILE"
 }
 
 show_exit() {

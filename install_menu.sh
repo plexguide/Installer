@@ -69,8 +69,8 @@ display_interface() {
     echo -e "${CYAN}PG Edition Selection Interface${NC}"
     echo -e "Note: Stable Edition will be Released When Ready."
     echo ""  # Space below the note
-    echo -e "[${RED}A${NC}] PG Alpha"
     echo -e "[${PURPLE}B${NC}] PG Beta"
+    echo -e "[${RED}A${NC}] PG Dev"
     echo -e "[${LIGHT_BLUE}F${NC}] PG Fork"
     echo -e "[Z] Exit"
     echo ""
@@ -105,10 +105,10 @@ validate_choice() {
     local choice="$1"
     case ${choice,,} in
         a)
-            echo "Selected PG Alpha." && echo ""
+            echo "Selected PG Dev." && echo ""
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
-            run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_alpha.sh"
+            run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_dev.sh"
             exit 0
             ;;
         b)
