@@ -2,6 +2,7 @@
 
 # Path to the configuration file
 CONFIG_FILE="/pg/config/pgfork.cfg"
+CONFIG_VERSION="/pg/config/config.cfg"
 COMMANDS_SCRIPT="/pg/installer/commands.sh"
 
 # ANSI color codes
@@ -19,20 +20,20 @@ branch="v11"
 
 # Function to set or update the VERSION in the config file
 set_config_version() {
-    if [[ ! -f "$CONFIG_FILE" ]]; then
-        echo "Creating config file at $CONFIG_FILE"
-        touch "$CONFIG_FILE"
+    if [[ ! -f "$CONFIG_VERSION" ]]; then
+        echo "Creating config file at $CONFIG_VERSION"
+        touch "$CONFIG_VERSION"
     fi
 
     version_string="PG Fork - $user/$repo ($branch)"
 
-    if grep -q "^VERSION=" "$CONFIG_FILE"; then
-        sed -i "s|^VERSION=.*|VERSION=\"$version_string\"|" "$CONFIG_FILE"
+    if grep -q "^VERSION=" "$CONFIG_VERSION"; then
+        sed -i "s|^VERSION=.*|VERSION=\"$version_string\"|" "$CONFIG_VERSION"
     else
-        echo "VERSION=\"$version_string\"" >> "$CONFIG_FILE"
+        echo "VERSION=\"$version_string\"" >> "$CONFIG_VERSION"
     fi
 
-    echo "VERSION has been set to \"$version_string\" in $CONFIG_FILE"
+    echo "VERSION has been set to \"$version_string\" in $CCONFIG_VERSION"
 }
 
 # Check if the configuration file exists, if not, create it
