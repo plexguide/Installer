@@ -20,23 +20,15 @@ branch="v11"
 
 # Function to set or update the VERSION in the config file
 set_config_version() {
-    echo "Debug: Entering set_config_version function"
-    echo "Debug: CONFIG_VERSION=$CONFIG_VERSION"
-    echo "Debug: user=$user, repo=$repo, branch=$branch"
-
     if [[ ! -f "$CONFIG_VERSION" ]]; then
-        echo "Debug: Creating config file at $CONFIG_VERSION"
+        echo "Creating config file at $CONFIG_VERSION"
         echo 'VERSION="PG Alpha"' > "$CONFIG_VERSION"
     fi
 
     version_string="PG Fork - $user/$repo ($branch)"
-    echo "Debug: New version_string=$version_string"
 
     # Use awk to replace the entire line containing VERSION
     awk -v new_version="$version_string" '/^VERSION=/{$0="VERSION=\"" new_version "\""} 1' "$CONFIG_VERSION" > "${CONFIG_VERSION}.tmp" && mv "${CONFIG_VERSION}.tmp" "$CONFIG_VERSION"
-
-    echo "Debug: Content of $CONFIG_VERSION after update:"
-    cat "$CONFIG_VERSION"
 
     echo "VERSION has been updated to \"$version_string\" in $CONFIG_VERSION"
 }
