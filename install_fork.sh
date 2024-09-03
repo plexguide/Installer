@@ -22,18 +22,15 @@ branch="v11"
 set_config_version() {
     if [[ ! -f "$CONFIG_VERSION" ]]; then
         echo "Creating config file at $CONFIG_VERSION"
-        touch "$CONFIG_VERSION"
+        echo 'VERSION="PG Alpha"' > "$CONFIG_VERSION"
     fi
 
     version_string="PG Fork - $user/$repo ($branch)"
 
-    if grep -q "^VERSION=" "$CONFIG_VERSION"; then
-        sed -i "s|^VERSION=.*|VERSION=\"$version_string\"|" "$CONFIG_VERSION"
-    else
-        echo "VERSION=\"$version_string\"" >> "$CONFIG_VERSION"
-    fi
+    # Use awk to replace the entire line containing VERSION
+    awk -v new_version="$version_string" '/^VERSION=/{$0="VERSION=\"" new_version "\""} 1' "$CONFIG_VERSION" > "${CONFIG_VERSION}.tmp" && mv "${CONFIG_VERSION}.tmp" "$CONFIG_VERSION"
 
-    echo "VERSION has been set to \"$version_string\" in $CCONFIG_VERSION"
+    echo "VERSION has been updated to \"$version_string\" in $CONFIG_VERSION"
 }
 
 # Check if the configuration file exists, if not, create it
@@ -131,22 +128,6 @@ move_scripts() {
         menu_commands
         exit 1
     fi
-}
-
-# Function to set or update the VERSION in the config file
-set_config_version() {
-    if [[ ! -f "$CONFIG_FILE" ]]; then
-        echo "Creating config file at $CONFIG_FILE"
-        touch "$CONFIG_FILE"
-    fi
-
-    if grep -q "^VERSION=" "$CONFIG_FILE"; then
-        sed -i 's/^VERSION=.*/VERSION="PG Fork"/' "$CONFIG_FILE"
-    else
-        echo 'VERSION="PG Fork"' >> "$CONFIG_FILE"
-    fi
-
-    echo "VERSION has been set to PG Fork in $CONFIG_FILE"
 }
 
 # Function to update the user name
