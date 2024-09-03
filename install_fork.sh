@@ -17,6 +17,24 @@ user="plexguide"
 repo="PlexGuide.com"
 branch="v11"
 
+# Function to set or update the VERSION in the config file
+set_config_version() {
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        echo "Creating config file at $CONFIG_FILE"
+        touch "$CONFIG_FILE"
+    fi
+
+    version_string="PG Fork - $user/$repo ($branch)"
+
+    if grep -q "^VERSION=" "$CONFIG_FILE"; then
+        sed -i "s|^VERSION=.*|VERSION=\"$version_string\"|" "$CONFIG_FILE"
+    else
+        echo "VERSION=\"$version_string\"" >> "$CONFIG_FILE"
+    fi
+
+    echo "VERSION has been set to \"$version_string\" in $CONFIG_FILE"
+}
+
 # Check if the configuration file exists, if not, create it
 if [[ ! -f "$CONFIG_FILE" ]]; then
     echo "Creating config file at $CONFIG_FILE"
