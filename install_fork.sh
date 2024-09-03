@@ -13,7 +13,7 @@ PURPLE="\033[0;35m"
 NC="\033[0m" # No color
 
 # Default values
-user="Admin9705"
+user="plexguide"
 repo="PlexGuide.com"
 branch="v11"
 
