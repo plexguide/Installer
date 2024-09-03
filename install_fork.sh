@@ -18,6 +18,7 @@ branch="v11"
 # Check if the configuration file exists, if not, create it
 if [[ ! -f "$CONFIG_FILE" ]]; then
     echo "Creating config file at $CONFIG_FILE"
+    mkdir -p "$(dirname "$CONFIG_FILE")"
     touch "$CONFIG_FILE"
     echo "user=\"$user\"" > "$CONFIG_FILE"
     echo "repo=\"$repo\"" >> "$CONFIG_FILE"
@@ -45,78 +46,134 @@ create_command_symlinks() {
     create_command_symlinks
 }
 
-# ... [keep all the existing functions: validate_github_user, validate_github_repo, validate_github_branch, create_directories, download_repository, move_scripts, set_config_version] ...
+# Function to create directories with the correct permissions
+create_directories() {
+    echo "Creating necessary directories..."
+
+    directories=(
+        "/pg/config"
+        "/pg/scripts"
+        "/pg/apps"
+        "/pg/stage"
+        "/pg/installer"
+    )
+
+    for dir in "${directories[@]}"; do
+        if [[ ! -d "$dir" ]]; then
+            mkdir -p "$dir"
+            echo "Created $dir"
+        else
+            echo "$dir already exists"
+        fi
+        chown -R 1000:1000 "$dir"
+        chmod -R +x "$dir"
+    done
+}
+
+# Function to download and place files into /pg/stage/
+download_repository() {
+    echo "Preparing /pg/stage/ directory..."
+
+    if [[ -d "/pg/stage/" ]]; then
+        rm -rf /pg/stage/*
+        rm -rf /pg/stage/.* 2>/dev/null || true
+        echo "Cleared /pg/stage/ directory."
+    fi
+
+    # Download the repository using the user, repo, and branch variables
+    echo "Downloading repository from ${user}/${repo} on branch ${branch}..."
+    git clone -b "$branch" "https://github.com/${user}/${repo}.git" /pg/stage/
+
+    if [[ $? -eq 0 ]]; then
+        echo "Repository successfully downloaded to /pg/stage/."
+    else
+        echo "Failed to download the repository. Please check your network connection and repository details."
+        exit 1
+    fi
+}
+
+# Function to move scripts from /pg/stage/mods/scripts to /pg/scripts/
+move_scripts() {
+    echo "Moving scripts from /pg/stage/mods/scripts to /pg/scripts/..."
+
+    if [[ -d "/pg/stage/mods/scripts" ]]; then
+        mv /pg/stage/mods/scripts/* /pg/scripts/
+
+        if [[ $? -eq 0 ]]; then
+            echo "Scripts successfully moved to /pg/scripts/."
+        else
+            echo "Failed to move scripts. Please check the file paths and permissions."
+            exit 1
+        fi
+    else
+        echo "Source directory /pg/stage/mods/scripts does not exist. No files to move."
+        menu_commands
+        exit 1
+    fi
+}
+
+# Function to set or update the VERSION in the config file
+set_config_version() {
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        echo "Creating config file at $CONFIG_FILE"
+        touch "$CONFIG_FILE"
+    fi
+
+    if grep -q "^VERSION=" "$CONFIG_FILE"; then
+        sed -i 's/^VERSION=.*/VERSION="PG Fork"/' "$CONFIG_FILE"
+    else
+        echo 'VERSION="PG Fork"' >> "$CONFIG_FILE"
+    fi
+
+    echo "VERSION has been set to PG Fork in $CONFIG_FILE"
+}
 
 # Function to update the user name
 update_user_name() {
-    while true; do
-        read -p "Enter the new user name: " new_user
-        if [[ -n "$new_user" ]]; then
-            if validate_github_user "$new_user"; then
-                user="$new_user"
-                echo "user=\"$user\"" > "$CONFIG_FILE"
-                echo "repo=\"$repo\"" >> "$CONFIG_FILE"
-                echo "branch=\"$branch\"" >> "$CONFIG_FILE"
-                echo -e "\nUser name updated to: $user"
-                echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
-                read -p ""
-                break
-            else
-                echo "Invalid GitHub user. Please try again."
-            fi
-        else
-            echo "User name cannot be empty. No changes made."
-            break
-        fi
-    done
+    read -p "Enter the new user name: " new_user
+    if [[ -n "$new_user" ]]; then
+        user="$new_user"
+        echo "user=\"$user\"" > "$CONFIG_FILE"
+        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
+        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
+        echo -e "\nUser name updated to: $user"
+        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
+        read -p ""
+    else
+        echo "User name cannot be empty. No changes made."
+    fi
 }
 
 # Function to update the repo name
 update_repo_name() {
-    while true; do
-        read -p "Enter the new repo name: " new_repo
-        if [[ -n "$new_repo" ]]; then
-            if validate_github_repo "$user" "$new_repo"; then
-                repo="$new_repo"
-                echo "user=\"$user\"" > "$CONFIG_FILE"
-                echo "repo=\"$repo\"" >> "$CONFIG_FILE"
-                echo "branch=\"$branch\"" >> "$CONFIG_FILE"
-                echo -e "\nRepo name updated to: $repo"
-                echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
-                read -p ""
-                break
-            else
-                echo "Invalid GitHub repository. Please try again."
-            fi
-        else
-            echo "Repo name cannot be empty. No changes made."
-            break
-        fi
-    done
+    read -p "Enter the new repo name: " new_repo
+    if [[ -n "$new_repo" ]]; then
+        repo="$new_repo"
+        echo "user=\"$user\"" > "$CONFIG_FILE"
+        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
+        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
+        echo -e "\nRepo name updated to: $repo"
+        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
+        read -p ""
+    else
+        echo "Repo name cannot be empty. No changes made."
+    fi
 }
 
 # Function to update the branch name
 update_branch_name() {
-    while true; do
-        read -p "Enter the new branch name: " new_branch
-        if [[ -n "$new_branch" ]]; then
-            if validate_github_branch "$user" "$repo" "$new_branch"; then
-                branch="$new_branch"
-                echo "user=\"$user\"" > "$CONFIG_FILE"
-                echo "repo=\"$repo\"" >> "$CONFIG_FILE"
-                echo "branch=\"$branch\"" >> "$CONFIG_FILE"
-                echo -e "\nBranch name updated to: $branch"
-                echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
-                read -p ""
-                break
-            else
-                echo "Invalid branch name. Please try again."
-            fi
-        else
-            echo "Branch name cannot be empty. No changes made."
-            break
-        fi
-    done
+    read -p "Enter the new branch name: " new_branch
+    if [[ -n "$new_branch" ]]; then
+        branch="$new_branch"
+        echo "user=\"$user\"" > "$CONFIG_FILE"
+        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
+        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
+        echo -e "\nBranch name updated to: $branch"
+        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
+        read -p ""
+    else
+        echo "Branch name cannot be empty. No changes made."
+    fi
 }
 
 # Function to deploy the PG Fork
@@ -134,20 +191,14 @@ deploy_pg_fork() {
         read -p "" response
 
         if [[ "$response" == "$yes_code" ]]; then
-            echo "Validating repository details..."
-            if validate_github_repo "$user" "$repo" && validate_github_branch "$user" "$repo" "$branch"; then
-                echo "Repository details are valid. Proceeding with deployment..."
-                create_directories
-                download_repository
-                move_scripts
-                set_config_version
-                create_command_symlinks
-                menu_commands
-                break
-            else
-                echo "Invalid repository details. Please update the user, repo, or branch name and try again."
-                read -p "Press Enter to continue..."
-            fi
+            echo "Proceeding with deployment..."
+            create_directories
+            download_repository
+            move_scripts
+            set_config_version
+            create_command_symlinks
+            menu_commands
+            break
         elif [[ "$response" == "$no_code" ]]; then
             echo "Deployment canceled."
             break
@@ -157,7 +208,49 @@ deploy_pg_fork() {
     done
 }
 
-# ... [keep the existing display_pgfork_menu and menu_commands functions] ...
+# Display the PG Fork menu
+display_pgfork_menu() {
+    while true; do
+        clear
+        echo -e "${PURPLE}PG Fork - OG Style${NC}"
+        echo "User: $user | Repo: $repo | Branch: $branch"
+        echo ""
+        echo -e "[${RED}D${NC}] Deploy PG Fork"
+        echo -e "[${RED}U${NC}] Update User Name"
+        echo -e "[${RED}R${NC}] Update Repo Name"
+        echo -e "[${RED}B${NC}] Update Branch Name"
+        echo -e "[${GREEN}Z${NC}] Exit"
+        echo ""
+        read -p "Enter a choice: " choice
+
+        case ${choice,,} in
+            d)
+                deploy_pg_fork
+                ;;
+            u)
+                update_user_name
+                ;;
+            r)
+                update_repo_name
+                ;;
+            b)
+                update_branch_name
+                ;;
+            z)
+                echo "Exiting..."
+                exit 0
+                ;;
+            *)
+                echo "Invalid input. Please try again."
+                ;;
+        esac
+    done
+}
+
+menu_commands() {
+    echo "Returning to the main menu..."
+    bash /pg/installer/menu_commands.sh
+}
 
 # Ensure commands.sh exists and create symlinks at the start
 ensure_commands_script
