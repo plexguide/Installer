@@ -203,6 +203,7 @@ deploy_pg_fork() {
         if [[ "$response" == "$yes_code" ]]; then
             echo "Validating repository details..."
             if validate_github_repo_and_branch; then
+                echo ""
                 echo "Repository details are valid. Proceeding with deployment..."
                 create_directories
                 download_repository
@@ -215,6 +216,7 @@ deploy_pg_fork() {
                 show_exit
                 exit 0
             else
+                echo ""
                 echo "Invalid repository details. The user, repo, and/or branch is not valid."
                 echo "Please update the information using the menu options."
                 echo "Press [ENTER] to acknowledge and return to the menu."
