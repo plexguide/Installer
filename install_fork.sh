@@ -5,8 +5,10 @@ CONFIG_FILE="/pg/config/pgfork.cfg"
 COMMANDS_SCRIPT="/pg/installer/commands.sh"
 
 # ANSI color codes
-RED="\033[0;31m"
-GREEN="\033[0;32m"
+LIGHT_RED="\033[1;31m"
+LIGHT_YELLOW="\033[1;33m"
+LIGHT_GREEN="\033[1;32m"
+LIGHT_BLUE="\033[1;34m"
 PURPLE="\033[0;35m"
 NC="\033[0m" # No color
 
@@ -243,11 +245,11 @@ display_pgfork_menu() {
         echo -e "${PURPLE}PG Fork - OG Style${NC}"
         echo "User: $user | Repo: $repo | Branch: $branch"
         echo ""
-        echo -e "[${RED}D${NC}] Deploy PG Fork"
-        echo -e "[${RED}U${NC}] Update User Name"
-        echo -e "[${RED}R${NC}] Update Repo Name"
-        echo -e "[${RED}B${NC}] Update Branch Name"
-        echo -e "[${GREEN}Z${NC}] Exit"
+        echo -e "[${LIGHT_RED}D${NC}] Deploy PG Fork"
+        echo -e "[${LIGHT_YELLOW}U${NC}] Update User Name"
+        echo -e "[${LIGHT_GREEN}R${NC}] Update Repo Name"
+        echo -e "[${LIGHT_BLUE}B${NC}] Update Branch Name"
+        echo -e "[${PURPLE}Z${NC}] Exit"
         echo ""
         read -p "Enter a choice: " choice
 
