@@ -47,59 +47,26 @@ download_repository() {
         echo "Cleared /pg/stage/ directory."
     fi
 
-#!/bin/bash
+    # Download the repository
+    echo "Downloading PlexGuide repository..."
+    git clone https://github.com/plexguide/PlexGuide.com.git /pg/stage/
 
-# Create /tmp directory if it doesn't exist
-if [ ! -d "/tmp" ]; then
-    echo "Creating /tmp directory..."
-    mkdir -p /tmp
-    if [ $? -eq 0 ]; then
-        echo "/tmp directory created successfully."
+    # Verify download success
+    if [[ $? -eq 0 ]]; then
+        echo "Repository successfully downloaded to /pg/stage/."
     else
-        echo "Failed to create /tmp directory. Please check your permissions."
+        echo "Failed to download the repository. Please check your network connection."
         exit 1
     fi
-else
-    echo "/tmp directory already exists."
-fi
-
-# Download the repository from the dev branch
-echo "Downloading PlexGuide repository (dev branch)..."
-wget -q https://github.com/plexguide/PlexGuide.com/archive/refs/heads/dev.zip -O /tmp/plexguide-dev.zip
-
-# Check if the download was successful
-if [[ $? -eq 0 ]]; then
-    echo "Repository successfully downloaded to /tmp/plexguide-dev.zip"
-    
-    # Create the destination directory if it doesn't exist
-    mkdir -p /pg/stage/
-    
-    # Unzip the downloaded file to the destination directory
-    unzip -q /tmp/plexguide-dev.zip -d /pg/stage/
-    
-    # Rename the extracted directory
-    mv /pg/stage/PlexGuide.com-dev /pg/stage/PlexGuide.com
-    
-    # Clean up the zip file
-    rm /tmp/plexguide-dev.zip
-    
-    echo "Repository successfully extracted to /pg/stage/PlexGuide.com"
-else
-    echo "Failed to download the repository. Please check your network connection."
-    exit 1
-fi
 }
 
+# Function to move scripts from /pg/stage/mods/scripts to /pg/scripts/
 move_scripts() {
-    echo "Moving scripts to /pg/scripts/..."
+    echo "Moving scripts from /pg/stage/mods/scripts to /pg/scripts/..."
 
     # Check if the source directory exists
-    if [[ -d "/pg/stage/PlexGuide.com/scripts" ]]; then
-        # Create /pg/scripts/ if it doesn't exist
-        mkdir -p /pg/scripts/
-        
-        # Move scripts
-        mv /pg/stage/PlexGuide.com/scripts/* /pg/scripts/
+    if [[ -d "/pg/stage/mods/scripts" ]]; then
+        mv /pg/stage/mods/scripts/* /pg/scripts/
 
         # Verify move success
         if [[ $? -eq 0 ]]; then
@@ -109,7 +76,7 @@ move_scripts() {
             exit 1
         fi
     else
-        echo "Source directory /pg/stage/PlexGuide.com/scripts does not exist. No files to move."
+        echo "Source directory /pg/stage/mods/scripts does not exist. No files to move."
         exit 1
     fi
 }
