@@ -188,7 +188,6 @@ validate_github_repo_and_branch() {
     fi
 }
 
-# Function to deploy the PG Fork
 deploy_pg_fork() {
     # Generate random 4-digit PIN codes for "yes" and "no"
     yes_code=$(printf "%04d" $((RANDOM % 10000)))
@@ -210,7 +209,7 @@ deploy_pg_fork() {
                 create_directories
                 download_repository
                 move_scripts
-                set_config_version
+                set_config_version  # Call set_config_version here
                 create_command_symlinks
                 echo "Deployment completed successfully."
                 echo "Press [ENTER] to exit."
