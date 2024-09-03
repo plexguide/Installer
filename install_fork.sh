@@ -208,6 +208,10 @@ deploy_pg_fork() {
     done
 }
 
+show_exit() {
+    bash /pg/installer/menu_exit.sh
+}
+
 # Display the PG Fork menu
 display_pgfork_menu() {
     while true; do
@@ -237,7 +241,7 @@ display_pgfork_menu() {
                 update_branch_name
                 ;;
             z)
-                echo "Exiting..."
+                show_exit
                 exit 0
                 ;;
             *)
