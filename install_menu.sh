@@ -70,7 +70,7 @@ display_interface() {
     echo -e "Note: Stable Edition will be Released When Ready."
     echo ""  # Space below the note
     echo -e "[${PURPLE}B${NC}] PG Beta"
-    echo -e "[${RED}A${NC}] PG Dev"
+    echo -e "[${RED}D${NC}] PG Dev"
     echo -e "[${LIGHT_BLUE}F${NC}] PG Fork"
     echo -e "[Z] Exit"
     echo ""
@@ -104,7 +104,7 @@ check_and_install_compose() {
 validate_choice() {
     local choice="$1"
     case ${choice,,} in
-        a)
+        d)
             echo "Selected PG Dev." && echo ""
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
