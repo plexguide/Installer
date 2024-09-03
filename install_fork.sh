@@ -176,6 +176,16 @@ update_branch_name() {
     fi
 }
 
+# Function to validate GitHub repository and branch
+validate_github_repo_and_branch() {
+    local api_url="https://api.github.com/repos/${user}/${repo}/branches/${branch}"
+    if curl --output /dev/null --silent --head --fail "$api_url"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Function to deploy the PG Fork
 deploy_pg_fork() {
     # Generate random 4-digit PIN codes for "yes" and "no"
@@ -191,14 +201,26 @@ deploy_pg_fork() {
         read -p "" response
 
         if [[ "$response" == "$yes_code" ]]; then
-            echo "Proceeding with deployment..."
-            create_directories
-            download_repository
-            move_scripts
-            set_config_version
-            create_command_symlinks
-            menu_commands
-            break
+            echo "Validating repository details..."
+            if validate_github_repo_and_branch; then
+                echo "Repository details are valid. Proceeding with deployment..."
+                create_directories
+                download_repository
+                move_scripts
+                set_config_version
+                create_command_symlinks
+                echo "Deployment completed successfully."
+                echo "Press [ENTER] to exit."
+                read -p ""
+                show_exit
+                exit 0
+            else
+                echo "Invalid repository details. The user, repo, and/or branch is not valid."
+                echo "Please update the information using the menu options."
+                echo "Press [ENTER] to acknowledge and return to the menu."
+                read -p ""
+                return
+            fi
         elif [[ "$response" == "$no_code" ]]; then
             echo "Deployment canceled."
             break
