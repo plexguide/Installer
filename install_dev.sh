@@ -90,13 +90,16 @@ else
 fi
 }
 
-# Function to move scripts from /pg/stage/mods/scripts to /pg/scripts/
 move_scripts() {
-    echo "Moving scripts from /pg/stage/mods/scripts to /pg/scripts/..."
+    echo "Moving scripts to /pg/scripts/..."
 
     # Check if the source directory exists
-    if [[ -d "/pg/stage/mods/scripts" ]]; then
-        mv /pg/stage/mods/scripts/* /pg/scripts/
+    if [[ -d "/pg/stage/PlexGuide.com/scripts" ]]; then
+        # Create /pg/scripts/ if it doesn't exist
+        mkdir -p /pg/scripts/
+        
+        # Move scripts
+        mv /pg/stage/PlexGuide.com/scripts/* /pg/scripts/
 
         # Verify move success
         if [[ $? -eq 0 ]]; then
@@ -106,7 +109,7 @@ move_scripts() {
             exit 1
         fi
     else
-        echo "Source directory /pg/stage/mods/scripts does not exist. No files to move."
+        echo "Source directory /pg/stage/PlexGuide.com/scripts does not exist. No files to move."
         exit 1
     fi
 }
