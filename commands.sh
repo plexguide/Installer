@@ -11,6 +11,7 @@ create_command_symlinks() {
         ["pgdev"]="/pg/installer/install_dev.sh"
         ["pgbeta"]="/pg/installer/install_beta.sh"
         ["pgfork"]="/pg/installer/install_fork.sh"
+        ["pgstable"]="/pg/installer/install_stable.sh"
     )
 
     # Loop over the associative array to create symbolic links and set executable permissions
