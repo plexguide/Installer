@@ -67,7 +67,7 @@ download_installer_repo() {
 display_interface() {
     clear
     echo -e "${CYAN}PG Edition Selection Interface${NC}"
-    echo -e "Note: Stable Edition will be Released When Ready."
+    echo -e "Note: Thank You for Using PlexGuide!"
     echo ""  # Space below the note
     echo -e "[${GREEN}S${NC}] PG Stable"
     echo -e "[${PURPLE}B${NC}] PG Beta"
