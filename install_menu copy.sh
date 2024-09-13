@@ -6,14 +6,14 @@ GREEN="\033[0;32m"
 PURPLE="\033[0;35m"
 CYAN="\033[0;36m"
 LIGHT_BLUE="\033[1;34m"
-BRIGHT_BLUE="\033[1;94m" # Bright blue
-HOT_PINK="\033[0;95m" # Hot pink
-BOLD="\033[1m"
 NC="\033[0m" # No color
 
 # Function to check and install required packages
 check_and_install_packages() {
+    # List of required packages
     local packages=("jq" "git" "sed" "awk" "cut")
+    
+    # Loop through each package and install if not found
     for package in "${packages[@]}"; do
         if ! command -v "$package" &> /dev/null; then
             echo "Installing missing package: $package..."
@@ -26,6 +26,8 @@ check_and_install_packages() {
 # Prepare the installer directory
 prepare_installer_directory() {
     local installer_dir="/pg/installer"
+    
+    # Create the /pg/installer directory if it doesn't exist
     if [[ ! -d "$installer_dir" ]]; then
         mkdir -p "$installer_dir"
     fi
@@ -35,13 +37,24 @@ prepare_installer_directory() {
 download_installer_repo() {
     local installer_dir="/pg/installer"
     local repo_url="https://github.com/plexguide/Installer.git"
+
     echo "Downloading Installer repository..."
+
+    # Prepare the /pg/installer directory
     prepare_installer_directory
+
+    # Clear the directory before downloading
     rm -rf "$installer_dir"/*
     rm -rf "$installer_dir"/.* 2>/dev/null || true
+
+    # Clone the repository
     git clone "$repo_url" "$installer_dir"
+
+    # Check if the clone was successful
     if [[ $? -eq 0 ]]; then
         echo "Installer repository successfully downloaded to $installer_dir."
+        
+        # Set ownership and permissions
         chown -R 1000:1000 "$installer_dir"
         chmod -R +x "$installer_dir"
     else
@@ -53,13 +66,13 @@ download_installer_repo() {
 # Function to display the interface
 display_interface() {
     clear
-    echo -e "${CYAN}${BOLD}PG Edition Selection Interface${NC}"
+    echo -e "${CYAN}PG Edition Selection Interface${NC}"
     echo -e "Note: Stable Edition will be Released When Ready."
     echo ""  # Space below the note
-    echo -e "[${RED}${BOLD}A${NC}] PG Alpha"
-    echo -e "[${PURPLE}${BOLD}B${NC}] PG Beta"
-    echo -e "[${BRIGHT_BLUE}${BOLD}F${NC}] PG Fork"
-    echo -e "[${HOT_PINK}${BOLD}Z${NC}] Exit"
+    echo -e "[${RED}A${NC}] PG Alpha"
+    echo -e "[${PURPLE}B${NC}] PG Beta"
+    echo -e "[${LIGHT_BLUE}F${NC}] PG Fork"
+    echo -e "[Z] Exit"
     echo ""
 }
 
@@ -67,6 +80,8 @@ display_interface() {
 check_and_install_docker() {
     if ! command -v docker &> /dev/null; then
         echo -e "${GREEN}Installing Docker...${NC}"
+        
+        # Basic Commands
         mkdir -p /pg/installer
         curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/docker.sh -o /pg/installer/docker.sh
         chmod +x /pg/installer/docker.sh
@@ -74,7 +89,7 @@ check_and_install_docker() {
     fi
 }
 
-# Function to check and install Docker Compose if not installed
+# Function to check and install Docker if not installed
 check_and_install_compose() {
     if ! command -v docker-compose &> /dev/null; then
         echo -e "${GREEN}Installing Docker-Compose...${NC}"
@@ -85,67 +100,35 @@ check_and_install_compose() {
     fi
 }
 
-# Function to prompt user for PINs
-handle_pin() {
-    local action=$1
-    while true; do
-        echo ""
-        # Generate new PINs every time
-        pin_forward=$((RANDOM % 9000 + 1000))
-        pin_exit=$((RANDOM % 9000 + 1000))
-
-        echo -e "To proceed, enter this PIN: ${HOT_PINK}${BOLD}$pin_forward${NC}"
-        echo -e "To exit, enter this PIN: ${GREEN}${BOLD}$pin_exit${NC}"
-        echo ""
-        read -p "Enter PIN > " user_pin
-
-        if [[ "$user_pin" == "$pin_forward" ]]; then
-            echo "Correct PIN entered. Proceeding with installation..."
-            return 0
-        elif [[ "$user_pin" == "$pin_exit" ]]; then
-            clear
-            echo -e "${RED}WARNING:${NC} If you exit without installing, you will need to run the install command again."
-            exit 0
-        else
-            echo "Invalid PIN. Try again."
-        fi
-    done
-}
-
 # Function to validate the user's choice
 validate_choice() {
     local choice="$1"
     case ${choice,,} in
         a)
             echo "Selected PG Alpha." && echo ""
-            handle_pin "forward"
-            download_installer_repo
+            prompt_for_pin  # Prompt for PIN before downloading and installing
+            download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_alpha.sh"
             exit 0
             ;;
         b)
             echo "Selected PG Beta." && echo ""
-            handle_pin "forward"
-            download_installer_repo
+            prompt_for_pin  # Prompt for PIN before downloading and installing
+            download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_beta.sh"
             exit 0
             ;;
         f)
             echo "Selected PG Fork." && echo ""
-            handle_pin "forward"
-            download_installer_repo
+            prompt_for_pin  # Prompt for PIN before downloading and installing
+            download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_fork.sh"
             exit 0
             ;;
         z)
-            if [[ ! -d /pg/scripts ]]; then
-                echo -e "${RED}WARNING:${NC} If you exit without installing, you will have to run the install command again."
-                handle_pin "exit"
-            else
-                clear
-                echo "You must run the install command to run PG again."
-                exit 0
-            fi
+            echo "Exiting the selection interface."
+            echo ""
+            exit 0
             ;;
         *)
             echo "Invalid input. Please try again."
@@ -153,14 +136,37 @@ validate_choice() {
     esac
 }
 
+# Function to prompt for a 4-digit PIN before proceeding
+prompt_for_pin() {
+    local random_pin=$(printf "%04d" $((RANDOM % 10000)))
+
+    while true; do
+        read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
+        if [[ "$response" == "$random_pin" ]]; then
+            echo "Correct PIN entered. Proceeding with installation..."
+            return 0
+        elif [[ "${response,,}" == "z" ]]; then
+            echo "Installation canceled."
+            exit 0
+        else
+            echo "Invalid input. Please try again."
+        fi
+    done
+}
+
 # Function to download and run the selected installation script
 run_install_script() {
     local script_url="$1"
     local installer_dir="/pg/installer"
     local script_file="$installer_dir/install_script.sh"
+
+    # Prepare the /pg/installer directory
     prepare_installer_directory
+
     echo "Downloading the installation script..."
     curl -sL "$script_url" -o "$script_file"
+    
+    # Check if the script was downloaded successfully
     if [[ -f "$script_file" ]]; then
         echo "Setting execute permissions and running the installation script..."
         chmod +x "$script_file"
@@ -179,7 +185,13 @@ check_and_install_compose
 
 # Main loop to display the interface and handle user input
 while true; do
+ # Check and install Docker if needed
     display_interface
     read -p "Enter your choice: " user_choice
     validate_choice "$user_choice"
+    
+    # Direct exit if 'z' or 'Z' is chosen
+    if [[ "${user_choice,,}" == "z" ]]; then
+        exit 0
+    fi
 done
