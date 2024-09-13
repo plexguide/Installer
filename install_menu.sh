@@ -195,7 +195,7 @@ check_and_install_compose
 while true; do
  # Check and install Docker if needed
     display_interface
-    read -p "Enter your choice: " user_choice
+    read -p "Make a Choice > " user_choice
     validate_choice "$user_choice"
     
     # Direct exit if 'z' or 'Z' is chosen
