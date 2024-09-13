@@ -23,6 +23,7 @@ echo ""  # Space for separation
 echo -e "${BOLD}Commands:${NC}"
 echo -e "[${BRIGHT_RED}1${NC}] plexguide   |  Deploy PlexGuide"
 echo -e "[${ORANGE}2${NC}] pg          |  Deploy PlexGuide"
+echo -e "[${LIGHT_GREEN}3${NC}] pgstable    |  Install Latest Dev Build"
 echo -e "[${YELLOW}3${NC}] pgdev       |  Install Latest Dev Build"
 echo -e "[${LIGHT_GREEN}4${NC}] pgbeta      |  Install Latest Beta Build"
 echo -e "[${CYAN}5${NC}] pgfork      |  Fork PlexGuide"
