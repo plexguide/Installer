@@ -250,7 +250,7 @@ display_pgfork_menu() {
         echo -e "[${LIGHT_BLUE}B${NC}] Update Branch Name"
         echo -e "[${PURPLE}Z${NC}] Exit"
         echo ""
-        read -p "Enter a choice: " choice
+        read -p "Make a Choice > " choice
 
         case ${choice,,} in
             d)
