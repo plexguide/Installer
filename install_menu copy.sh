@@ -7,7 +7,6 @@ PURPLE="\033[0;35m"
 CYAN="\033[0;36m"
 LIGHT_BLUE="\033[1;34m"
 BOLD="\033[1m"
-HOT_PINK="\033[1;35m"
 NC="\033[0m" # No color
 
 # Function to check and install required packages
@@ -68,7 +67,7 @@ download_installer_repo() {
 # Function to display the interface
 display_interface() {
     clear
-    echo -e "${BOLD}${CYAN}PG Edition Selection Interface${NC}"
+    echo -e "${CYAN}PG Edition Selection Interface${NC}"
     echo -e "Note: Thank You for Using PlexGuide!"
     echo ""  # Space below the note
     echo -e "[${BOLD}${GREEN}S${NC}] PG Stable"
@@ -109,38 +108,36 @@ validate_choice() {
     case ${choice,,} in
         d)
             echo "Selected PG Dev."
-            prompt_for_pin "dev"  # Prompt for PIN before downloading and installing
-            if [[ $? -eq 0 ]]; then return; fi  # Exit back to menu if user cancels
+            prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_dev.sh"
             exit 0
             ;;
         s)
             echo "Selected PG Stable."
-            prompt_for_pin "stable"  # Prompt for PIN before downloading and installing
-            if [[ $? -eq 0 ]]; then return; fi  # Exit back to menu if user cancels
+            prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_stable.sh"
             exit 0
             ;;
         b)
             echo "Selected PG Beta."
-            prompt_for_pin "beta"  # Prompt for PIN before downloading and installing
-            if [[ $? -eq 0 ]]; then return; fi  # Exit back to menu if user cancels
+            prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_beta.sh"
             exit 0
             ;;
         f)
             echo "Selected PG Fork."
-            prompt_for_pin "fork"  # Prompt for PIN before downloading and installing
-            if [[ $? -eq 0 ]]; then return; fi  # Exit back to menu if user cancels
+            prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_fork.sh"
             exit 0
             ;;
         z)
-            exit_warning  # Trigger warning if user chooses to exit
+            echo "Exiting the selection interface."
+            echo ""
+            exit 0
             ;;
         *)
             echo "Invalid input. Please try again."
@@ -150,23 +147,22 @@ validate_choice() {
 
 # Function to prompt for a 4-digit PIN before proceeding
 prompt_for_pin() {
-    local mode="$1"
     # Generate random 4-digit PINs
     pin_proceed=$((RANDOM % 9000 + 1000))  # Random 4-digit PIN for proceeding
     pin_exit=$((RANDOM % 9000 + 1000))     # Random 4-digit PIN for exiting
 
     while true; do
-        echo -e "\nTo proceed, enter this PIN: ${BOLD}${HOT_PINK}$pin_proceed${NC}"  # Hot pink PIN for proceeding
-        echo -e "To exit, enter this PIN: ${BOLD}${GREEN}$pin_exit${NC}"           # Green for exiting
+        echo -e "\nTo proceed, enter this PIN: \033[95m$pin_proceed\033[0m"  # Hot pink PIN for proceeding
+        echo -e "To exit, enter this PIN: \033[32m$pin_exit\033[0m"           # Green PIN for exiting
         echo ""
         read -p "Enter PIN > " user_pin
         
         if [[ "$user_pin" == "$pin_proceed" ]]; then
             echo "Correct PIN entered. Proceeding with installation..."
-            return 1  # Continue to installation
+            return 0
         elif [[ "$user_pin" == "$pin_exit" ]]; then
-            echo "Installation aborted. Returning to the main menu."
-            return 0  # Return to the main menu
+            echo "Installation canceled."
+            exit 0
         else
             echo "Invalid PIN. Try again."
         fi
@@ -201,43 +197,6 @@ run_install_script() {
     fi
 }
 
-# Function to handle exit and prompt 4-digit PIN
-exit_warning() {
-    if [[ ! -d "/pg" ]]; then
-        pin_yes=$((RANDOM % 9000 + 1000))  # Random 4-digit PIN for 'Yes' to exit
-        pin_no=$((RANDOM % 9000 + 1000))   # Random 4-digit PIN for 'No' to cancel
-
-        while true; do
-            echo "" && echo -e "${BOLD}\033[31mWarning: PlexGuide has not been installed.\033[0m"  # Bold red for WARNING
-            echo -e "Are you sure you want to exit?" && echo ""
-            echo -e "To exit, enter this PIN: ${BOLD}${HOT_PINK}$pin_yes${NC}"   # Hot pink 'Yes' to exit
-            echo -e "To cancel, enter this PIN: ${BOLD}${GREEN}$pin_no${NC}"   # Green 'No' to cancel
-            echo ""
-            read -p "Enter PIN > " user_pin
-
-            if [[ "$user_pin" == "$pin_yes" ]]; then
-                echo "" && echo "Exiting... Creating pgreinstall command."
-                create_pgreinstall
-                exit 0
-            elif [[ "$user_pin" == "$pin_no" ]]; then
-                return 0  # Cancel exit, return to menu
-            else
-                echo "Invalid PIN. Try again." && echo ""
-            fi
-        done
-    else
-        exit 0  # Normal exit if /pg exists
-    fi
-}
-
-# Function to create pgreinstall command
-create_pgreinstall() {
-    echo "bash <(curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh)" > /tmp/pgreinstall.sh
-    chmod +x /tmp/pgreinstall.sh
-    ln -sf /tmp/pgreinstall.sh /usr/local/bin/pgreinstall
-    echo -e "NOTE: Type '${GREEN}pgreinstall${NC}' to run the installer again." && echo ""
-}
-
 # To execute at the start
 check_and_install_packages
 check_and_install_docker
@@ -248,4 +207,9 @@ while true; do
     display_interface
     read -p "Make a Choice > " user_choice
     validate_choice "$user_choice"
+    
+    # Direct exit if 'z' or 'Z' is chosen
+    if [[ "${user_choice,,}" == "z" ]]; then
+        exit 0
+    fi
 done
