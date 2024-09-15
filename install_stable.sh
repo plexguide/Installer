@@ -55,12 +55,13 @@ create_directories() {
     done
 }
 
-# Function to move folders from /pg/stage/mods/ to /pg/
+# Function to move folders from the extracted folder's mods directory
 move_folders() {
-    echo "Moving folders from /pg/stage/mods/ to /pg/..."
+    local extracted_folder="$1"
+    echo "Moving folders from $extracted_folder/mods/ to /pg/..."
 
-    if [[ -d "/pg/stage/mods" ]]; then
-        for folder in /pg/stage/mods/*; do
+    if [[ -d "$extracted_folder/mods" ]]; then
+        for folder in "$extracted_folder/mods/"*; do
             foldername=$(basename "$folder")
 
             # Remove the existing folder in /pg/$foldername
@@ -69,8 +70,8 @@ move_folders() {
                 echo "Removed existing folder: /pg/$foldername"
             fi
 
-            # Copy the folder from /pg/stage/mods/ to /pg/
-            cp -r "/pg/stage/mods/$foldername" "/pg/$foldername"
+            # Copy the folder from the extracted folder's mods directory to /pg/
+            cp -r "$extracted_folder/mods/$foldername" "/pg/$foldername"
             echo "Copied $foldername to /pg/"
 
             # Set permissions and ownership for the folder and its contents
@@ -79,7 +80,7 @@ move_folders() {
             echo "Set permissions and ownership for /pg/$foldername and its contents"
         done
     else
-        echo "Source directory /pg/stage/mods does not exist. No folders to move."
+        echo "Source directory $extracted_folder/mods does not exist. No folders to move."
         exit 1
     fi
 }
@@ -98,8 +99,8 @@ download_and_extract() {
     if [[ -d "$extracted_folder" ]]; then
         echo "Found extracted folder: $extracted_folder"
         
-        # Move all folders from /pg/stage/mods/ to /pg/
-        move_folders
+        # Move all folders from the extracted folder's mods directory to /pg/
+        move_folders "$extracted_folder"
 
         # Clear the /pg/stage directory after moving the files
         rm -rf /pg/stage/*
