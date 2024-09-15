@@ -233,7 +233,7 @@ exit_warning() {
 create_pgreinstall() {
     mkdir -p /pgreinstall
     echo "bash <(curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh)" > /pgreinstall/pgreinstall.sh
-    chmod +x /tmp/pgreinstall.sh
+    chmod +x /pgreinstall/pgreinstall.sh
     ln -sf /pgreinstall/pgreinstall.sh /usr/local/bin/pgreinstall
 }
 
