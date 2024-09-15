@@ -1,32 +1,34 @@
 #!/bin/bash
 
+# Function to create symbolic links for command scripts
 create_command_symlinks() {
     echo "Creating command symlinks..."
-    
-    commands=(
-        "pgbeta"
-        "pgfork"
-        "pgdev"
-        "pgstable"
+
+    # Define an associative array with command names as keys and script paths as values
+    declare -A commands=(
+        ["plexguide"]="/pg/scripts/menu.sh"
+        ["pg"]="/pg/scripts/menu.sh"
+        ["pgdev"]="/pg/installer/install_dev.sh"
+        ["pgbeta"]="/pg/installer/install_beta.sh"
+        ["pgfork"]="/pg/installer/install_fork.sh"
+        ["pgstable"]="/pg/installer/install_stable.sh"
     )
 
-    for cmd in "${commands[@]}"; do
-        target="/pg/scripts/menu.sh"
-        symlink="/usr/local/bin/$cmd"
+    # Loop over the associative array to create symbolic links and set executable permissions
+    for cmd in "${!commands[@]}"; do
+        # Create the symbolic link with force option to overwrite if it exists
+        sudo ln -sf "${commands[$cmd]}" "/usr/local/bin/$cmd"
 
-        if [[ -f "$target" ]]; then
-            ln -sf "$target" "$symlink"
-            echo "Created symlink: $symlink -> $target"
-            
-            # Set permissions and ownership only if the target exists
-            if [[ -e "$symlink" ]]; then
-                chown 1000:1000 "$symlink"
-                chmod +x "$symlink"
-            fi
-        else
-            echo "Target file for $cmd ($target) does not exist. Skipping symlink creation."
-        fi
+        # Set ownership to 1000:1000
+        sudo chown 1000:1000 "/usr/local/bin/$cmd"
+
+        # Set the executable permission to 755 (read and execute for everyone)
+        sudo chmod 755 "/usr/local/bin/$cmd"
+        
+        echo "Created symlink: $cmd -> ${commands[$cmd]}"
     done
+
+    echo "Command symlinks created successfully."
 }
 
 # Function to set up the pginstall command

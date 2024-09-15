@@ -11,6 +11,7 @@ LIGHT_YELLOW="\033[1;33m"
 LIGHT_GREEN="\033[1;32m"
 LIGHT_BLUE="\033[1;34m"
 PURPLE="\033[0;35m"
+HOT_PINK="\033[1;35m"
 NC="\033[0m" # No color
 
 # Default values
@@ -139,28 +140,19 @@ move_folders() {
     fi
 }
 
-# Function to validate GitHub repository and branch
-validate_github_repo_and_branch() {
-    local api_url="https://api.github.com/repos/${user}/${repo}/branches/${branch}"
-    if curl --output /dev/null --silent --head --fail "$api_url"; then
-        return 0
-    else
-        return 1
-    fi
-}
-
+# New Function: Deploy PG Fork with updated 4-digit PIN format
 deploy_pg_fork() {
     # Generate random 4-digit PIN codes for "yes" and "no"
     yes_code=$(printf "%04d" $((RANDOM % 10000)))
     no_code=$(printf "%04d" $((RANDOM % 10000)))
-
+    echo "" && echo "You have chosen to deploy the PG Fork."
     while true; do
-        clear
-        echo "You have chosen to deploy the PG Fork."
         echo ""
-        echo -e "Type [${RED}${yes_code}${NC}] to proceed or [${GREEN}${no_code}${NC}] to cancel: "
-
-        read -p "" response
+        # Two-sentence format for PIN prompt
+        echo -e "To proceed, enter this PIN: ${BOLD}${HOT_PINK}${yes_code}${NC}"
+        echo -e "To cancel, enter this PIN: ${BOLD}${LIGHT_GREEN}${no_code}${NC}"
+        
+       echo && read -p "Enter PIN > " response
 
         if [[ "$response" == "$yes_code" ]]; then
             echo "Validating repository details..."
@@ -186,7 +178,7 @@ deploy_pg_fork() {
             echo "Deployment canceled."
             break
         else
-            echo "Invalid input. Please try again."
+            echo && echo "Invalid input. Please try again."
         fi
     done
 }
