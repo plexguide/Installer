@@ -231,9 +231,10 @@ exit_warning() {
 
 # Function to create pgreinstall command
 create_pgreinstall() {
-    echo "bash <(curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh)" > /tmp/pgreinstall.sh
+    mkdir -p /pgreinstall
+    echo "bash <(curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh)" > /pgreinstall/pgreinstall.sh
     chmod +x /tmp/pgreinstall.sh
-    ln -sf /tmp/pgreinstall.sh /usr/local/bin/pgreinstall
+    ln -sf /pgreinstall/pgreinstall.sh /usr/local/bin/pgreinstall
 }
 
 # To execute at the start
