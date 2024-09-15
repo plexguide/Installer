@@ -47,9 +47,9 @@ download_repository() {
         echo "Cleared /pg/stage/ directory."
     fi
 
-    # Download the repository
-    echo "Downloading PlexGuide repository..."
-    git clone https://github.com/plexguide/PlexGuide.com.git /pg/stage/
+    # Download the repository from the dev branch
+    echo "Downloading PlexGuide repository from the dev branch..."
+    git clone -b dev "https://github.com/plexguide/PlexGuide.com.git" /pg/stage/
 
     # Verify download success
     if [[ $? -eq 0 ]]; then
