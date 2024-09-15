@@ -88,7 +88,29 @@ create_directories() {
     done
 }
 
-# Function to move folders from /pg/stage/mods/ to /pg/
+# Function to download and place files into /pg/stage/
+download_repository() {
+    echo "Preparing /pg/stage/ directory..."
+
+    if [[ -d "/pg/stage/" ]]; then
+        rm -rf /pg/stage/*
+        rm -rf /pg/stage/.* 2>/dev/null || true
+        echo "Cleared /pg/stage/ directory."
+    fi
+
+    # Download the repository using the user, repo, and branch variables
+    echo "Downloading repository from ${user}/${repo} on branch ${branch}..."
+    git clone -b "$branch" "https://github.com/${user}/${repo}.git" /pg/stage/
+
+    if [[ $? -eq 0 ]]; then
+        echo "Repository successfully downloaded to /pg/stage/."
+    else
+        echo "Failed to download the repository. Please check your network connection and repository details."
+        exit 1
+    fi
+}
+
+# Function to move content from /pg/stage/mods/ to /pg/
 move_folders() {
     echo "Moving folders from /pg/stage/mods/ to /pg/..."
 
@@ -117,29 +139,16 @@ move_folders() {
     fi
 }
 
-# Function to download and place files into /pg/stage/
-download_repository() {
-    echo "Preparing /pg/stage/ directory..."
-
-    if [[ -d "/pg/stage/" ]]; then
-        rm -rf /pg/stage/*
-        rm -rf /pg/stage/.* 2>/dev/null || true
-        echo "Cleared /pg/stage/ directory."
-    fi
-
-    # Download the repository using the user, repo, and branch variables
-    echo "Downloading repository from ${user}/${repo} on branch ${branch}..."
-    git clone -b "$branch" "https://github.com/${user}/${repo}.git" /pg/stage/
-
-    if [[ $? -eq 0 ]]; then
-        echo "Repository successfully downloaded to /pg/stage/."
+# Function to validate GitHub repository and branch
+validate_github_repo_and_branch() {
+    local api_url="https://api.github.com/repos/${user}/${repo}/branches/${branch}"
+    if curl --output /dev/null --silent --head --fail "$api_url"; then
+        return 0
     else
-        echo "Failed to download the repository. Please check your network connection and repository details."
-        exit 1
+        return 1
     fi
 }
 
-# Function to deploy PG Fork
 deploy_pg_fork() {
     # Generate random 4-digit PIN codes for "yes" and "no"
     yes_code=$(printf "%04d" $((RANDOM % 10000)))
@@ -161,7 +170,7 @@ deploy_pg_fork() {
                 create_directories
                 download_repository
                 move_folders
-                set_config_version
+                set_config_version  # Call set_config_version here
                 create_command_symlinks
                 echo "Deployment completed successfully."
                 echo "Press [ENTER] to exit."
@@ -226,6 +235,11 @@ display_pgfork_menu() {
                 ;;
         esac
     done
+}
+
+menu_commands() {
+    echo "Returning to the main menu..."
+    bash /pg/installer/menu_commands.sh
 }
 
 # Ensure commands.sh exists and create symlinks at the start
