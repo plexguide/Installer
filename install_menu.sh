@@ -216,8 +216,7 @@ exit_warning() {
             read -p "Enter PIN > " user_pin
 
             if [[ "$user_pin" == "$pin_yes" ]]; then
-                echo "" && echo "Exiting... Creating pgreinstall command."
-                create_pgreinstall
+                echo -e "NOTE: Type '${GREEN}pgreinstall${NC}' to run the installer again." && echo ""
                 exit 0
             elif [[ "$user_pin" == "$pin_no" ]]; then
                 return 0  # Cancel exit, return to menu
@@ -235,13 +234,13 @@ create_pgreinstall() {
     echo "bash <(curl -fsSL https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh)" > /tmp/pgreinstall.sh
     chmod +x /tmp/pgreinstall.sh
     ln -sf /tmp/pgreinstall.sh /usr/local/bin/pgreinstall
-    echo -e "NOTE: Type '${GREEN}pgreinstall${NC}' to run the installer again." && echo ""
 }
 
 # To execute at the start
 check_and_install_packages
 check_and_install_docker
 check_and_install_compose
+create_pgreinstall
 
 # Main loop to display the interface and handle user input
 while true; do
