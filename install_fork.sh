@@ -172,9 +172,6 @@ deploy_pg_fork() {
                 move_folders
                 set_config_version  # Call set_config_version here
                 create_command_symlinks
-                echo "Deployment completed successfully."
-                echo "Press [ENTER] to exit."
-                read -p ""
                 show_exit
                 exit 0
             else
