@@ -6,6 +6,7 @@ GREEN="\033[0;32m"
 PURPLE="\033[0;35m"
 CYAN="\033[0;36m"
 LIGHT_BLUE="\033[1;34m"
+BOLD="\033[1m"
 NC="\033[0m" # No color
 
 # Function to check and install required packages
@@ -69,11 +70,11 @@ display_interface() {
     echo -e "${CYAN}PG Edition Selection Interface${NC}"
     echo -e "Note: Thank You for Using PlexGuide!"
     echo ""  # Space below the note
-    echo -e "[${GREEN}S${NC}] PG Stable"
-    echo -e "[${PURPLE}B${NC}] PG Beta"
-    echo -e "[${RED}D${NC}] PG Dev"
-    echo -e "[${LIGHT_BLUE}F${NC}] PG Fork"
-    echo -e "[Z] Exit"
+    echo -e "[${BOLD}${GREEN}S${NC}] PG Stable"
+    echo -e "[${BOLD}${PURPLE}B${NC}] PG Beta"
+    echo -e "[${BOLD}${RED}D${NC}] PG Dev"
+    echo -e "[${BOLD}${LIGHT_BLUE}F${NC}] PG Fork"
+    echo -e "[${BOLD}${CYAN}Z${NC}] Exit"
     echo ""
 }
 
