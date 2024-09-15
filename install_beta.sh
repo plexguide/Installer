@@ -1,67 +1,24 @@
 #!/bin/bash
 
-# Path to the configuration file
-CONFIG_FILE="/pg/config/pgfork.cfg"
-CONFIG_VERSION="/pg/config/config.cfg"
-COMMANDS_SCRIPT="/pg/installer/commands.sh"
-
-# ANSI color codes
-LIGHT_RED="\033[1;31m"
-LIGHT_YELLOW="\033[1;33m"
-LIGHT_GREEN="\033[1;32m"
-LIGHT_BLUE="\033[1;34m"
-PURPLE="\033[0;35m"
+# ANSI color codes for formatting
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+ORANGE="\033[0;33m"
 NC="\033[0m" # No color
 
-# Default values
-user="plexguide"
-repo="PlexGuide.com"
-branch="v11"
-
-# Function to set or update the VERSION in the config file
-set_config_version() {
-    if [[ ! -f "$CONFIG_VERSION" ]]; then
-        echo "Creating config file at $CONFIG_VERSION"
-        echo 'VERSION="PG Alpha"' > "$CONFIG_VERSION"
-    fi
-
-    version_string="Fork - $user/$repo ($branch)"
-
-    # Use awk to replace the entire line containing VERSION
-    awk -v new_version="$version_string" '/^VERSION=/{$0="VERSION=\"" new_version "\""} 1' "$CONFIG_VERSION" > "${CONFIG_VERSION}.tmp" && mv "${CONFIG_VERSION}.tmp" "$CONFIG_VERSION"
-
-    echo "VERSION has been updated to \"$version_string\" in $CONFIG_VERSION"
-}
-
-# Check if the configuration file exists, if not, create it
-if [[ ! -f "$CONFIG_FILE" ]]; then
-    echo "Creating config file at $CONFIG_FILE"
-    mkdir -p "$(dirname "$CONFIG_FILE")"
-    touch "$CONFIG_FILE"
-    echo "user=\"$user\"" > "$CONFIG_FILE"
-    echo "repo=\"$repo\"" >> "$CONFIG_FILE"
-    echo "branch=\"$branch\"" >> "$CONFIG_FILE"
-else
-    # Source the configuration file to load existing values
-    source "$CONFIG_FILE"
-fi
-
-# Function to ensure commands.sh exists and is executable
-ensure_commands_script() {
-    if [[ ! -f "$COMMANDS_SCRIPT" ]]; then
-        echo "commands.sh not found. Downloading from GitHub..."
-        mkdir -p "$(dirname "$COMMANDS_SCRIPT")"
-        curl -o "$COMMANDS_SCRIPT" https://raw.githubusercontent.com/plexguide/Installer/v11/commands.sh
-        chmod +x "$COMMANDS_SCRIPT"
-        chown 1000:1000 "$COMMANDS_SCRIPT"
+# Function to check and install unzip if not present
+check_and_install_unzip() {
+    if ! command -v unzip &> /dev/null; then
+        echo "unzip not found. Installing unzip..."
+        sudo apt-get update
+        sudo apt-get install -y unzip
+        echo "unzip has been installed."
     fi
 }
 
-# Function to create command symlinks
-create_command_symlinks() {
-    ensure_commands_script
-    source "$COMMANDS_SCRIPT"
-    create_command_symlinks
+# Function to fetch all releases from GitHub and filter them
+fetch_releases() {
+    curl -s https://api.github.com/repos/plexguide/PlexGuide.com/releases | jq -r '.[].tag_name' | grep -E '^11\.[0-9]\.B[0-9]+' | sort -r | head -n 50
 }
 
 # Function to create directories with the correct permissions
@@ -88,34 +45,13 @@ create_directories() {
     done
 }
 
-# Function to download and place files into /pg/stage/
-download_repository() {
-    echo "Preparing /pg/stage/ directory..."
-
-    if [[ -d "/pg/stage/" ]]; then
-        rm -rf /pg/stage/*
-        rm -rf /pg/stage/.* 2>/dev/null || true
-        echo "Cleared /pg/stage/ directory."
-    fi
-
-    # Download the repository using the user, repo, and branch variables
-    echo "Downloading repository from ${user}/${repo} on branch ${branch}..."
-    git clone -b "$branch" "https://github.com/${user}/${repo}.git" /pg/stage/
-
-    if [[ $? -eq 0 ]]; then
-        echo "Repository successfully downloaded to /pg/stage/."
-    else
-        echo "Failed to download the repository. Please check your network connection and repository details."
-        exit 1
-    fi
-}
-
-# Function to move content from /pg/stage/mods/ to /pg/
+# Function to move folders from the extracted folder's mods directory
 move_folders() {
-    echo "Moving folders from /pg/stage/mods/ to /pg/..."
+    local extracted_folder="$1"
+    echo "Moving folders from $extracted_folder/mods/ to /pg/..."
 
-    if [[ -d "/pg/stage/mods" ]]; then
-        for folder in /pg/stage/mods/*; do
+    if [[ -d "$extracted_folder/mods" ]]; then
+        for folder in "$extracted_folder/mods/"*; do
             foldername=$(basename "$folder")
 
             # Remove the existing folder in /pg/$foldername
@@ -124,8 +60,8 @@ move_folders() {
                 echo "Removed existing folder: /pg/$foldername"
             fi
 
-            # Copy the folder from /pg/stage/mods/ to /pg/
-            cp -r "/pg/stage/mods/$foldername" "/pg/$foldername"
+            # Copy the folder from the extracted folder's mods directory to /pg/
+            cp -r "$extracted_folder/mods/$foldername" "/pg/$foldername"
             echo "Copied $foldername to /pg/"
 
             # Set permissions and ownership for the folder and its contents
@@ -134,117 +70,123 @@ move_folders() {
             echo "Set permissions and ownership for /pg/$foldername and its contents"
         done
     else
-        echo "Source directory /pg/stage/mods does not exist. No folders to move."
+        echo "Source directory $extracted_folder/mods does not exist. No folders to move."
         exit 1
     fi
 }
 
-# Function to validate GitHub repository and branch
-validate_github_repo_and_branch() {
-    local api_url="https://api.github.com/repos/${user}/${repo}/branches/${branch}"
-    if curl --output /dev/null --silent --head --fail "$api_url"; then
-        return 0
+# Function to download and extract the selected release
+download_and_extract() {
+    local selected_version="$1"
+    local url="https://github.com/plexguide/PlexGuide.com/archive/refs/tags/${selected_version}.zip"
+    
+    echo "Downloading and extracting ${selected_version}..."
+    curl -L -o /pg/stage/release.zip "$url"
+    
+    unzip -o /pg/stage/release.zip -d /pg/stage/
+    local extracted_folder="/pg/stage/PlexGuide.com-${selected_version}"
+    
+    if [[ -d "$extracted_folder" ]]; then
+        echo "Found extracted folder: $extracted_folder"
+        
+        # Move all folders from the extracted folder's mods directory to /pg/
+        move_folders "$extracted_folder"
+
+        # Clear the /pg/stage directory after moving the files
+        rm -rf /pg/stage/*
+        echo "Cleared /pg/stage directory after moving files."
     else
-        return 1
+        echo "Extracted folder $extracted_folder not found!"
     fi
+    
+    echo "Files for ${selected_version} have been processed."
 }
 
-deploy_pg_fork() {
-    # Generate random 4-digit PIN codes for "yes" and "no"
-    yes_code=$(printf "%04d" $((RANDOM % 10000)))
-    no_code=$(printf "%04d" $((RANDOM % 10000)))
+# Function to update the version in the config file
+update_config_version() {
+    local selected_version="$1"
+    local config_file="/pg/config/config.cfg"
 
-    while true; do
-        clear
-        echo "You have chosen to deploy the PG Fork."
-        echo ""
-        echo -e "Type [${RED}${yes_code}${NC}] to proceed or [${GREEN}${no_code}${NC}] to cancel: "
+    if [[ ! -f "$config_file" ]]; then
+        echo "Creating config file at $config_file"
+        touch "$config_file"
+    fi
 
-        read -p "" response
+    if grep -q "^VERSION=" "$config_file"; then
+        sed -i "s/^VERSION=.*/VERSION=\"$selected_version\"/" "$config_file"
+    else
+        echo "VERSION=\"$selected_version\"" >> "$config_file"
+    fi
 
-        if [[ "$response" == "$yes_code" ]]; then
-            echo "Validating repository details..."
-            if validate_github_repo_and_branch; then
-                echo ""
-                echo "Repository details are valid. Proceeding with deployment..."
-                create_directories
-                download_repository
-                move_folders
-                set_config_version  # Call set_config_version here
-                create_command_symlinks
-                echo "Deployment completed successfully."
-                echo "Press [ENTER] to exit."
-                read -p ""
-                show_exit
-                exit 0
-            else
-                echo ""
-                echo "Invalid repository details. The user, repo, and/or branch is not valid."
-                echo "Please update the information using the menu options."
-                echo "Press [ENTER] to acknowledge and return to the menu."
-                read -p ""
-                return
-            fi
-        elif [[ "$response" == "$no_code" ]]; then
-            echo "Deployment canceled."
-            break
-        else
-            echo "Invalid input. Please try again."
+    echo "VERSION has been set to $selected_version in $config_file"
+}
+
+# Function to display releases
+display_releases() {
+    releases="$1"
+    echo -e "${RED}PG Beta Releases:${NC}"
+    echo ""
+    line_length=0
+    first_release=true
+    for release in $releases; do
+        if (( line_length + ${#release} + 1 > 80 )); then
+            echo ""
+            line_length=0
         fi
+        if $first_release; then
+            echo -n -e "${ORANGE}$release${NC} "
+            first_release=false
+        else
+            echo -n "$release "
+        fi
+        line_length=$((line_length + ${#release} + 1))
     done
+    echo "" # New line after displaying all releases
 }
 
 show_exit() {
     bash /pg/installer/menu_exit.sh
 }
 
-# Display the PG Fork menu
-display_pgfork_menu() {
-    while true; do
-        clear
-        echo -e "${PURPLE}PG Fork - OG Style${NC}"
-        echo "User: $user | Repo: $repo | Branch: $branch"
-        echo ""
-        echo -e "[${LIGHT_RED}D${NC}] Deploy PG Fork"
-        echo -e "[${LIGHT_YELLOW}U${NC}] Update User Name"
-        echo -e "[${LIGHT_GREEN}R${NC}] Update Repo Name"
-        echo -e "[${LIGHT_BLUE}B${NC}] Update Branch Name"
-        echo -e "[${PURPLE}Z${NC}] Exit"
-        echo ""
-        read -p "Make a Choice > " choice
+# Main logic
+while true; do
+    clear
+    releases=$(fetch_releases)
+    
+    if [[ -z "$releases" ]]; then
+        echo "No releases found starting with '11' and containing 'B'."
+        exit 1
+    fi
 
-        case ${choice,,} in
-            d)
-                deploy_pg_fork
-                ;;
-            u)
-                update_user_name
-                ;;
-            r)
-                update_repo_name
-                ;;
-            b)
-                update_branch_name
-                ;;
-            z)
+    display_releases "$releases"
+    echo ""
+    read -p "Which version do you want to install? " selected_version
+
+    if echo "$releases" | grep -q "^${selected_version}$"; then
+        echo ""
+        random_pin=$(printf "%04d" $((RANDOM % 10000)))
+        while true; do
+            read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
+            if [[ "$response" == "$random_pin" ]]; then
+                check_and_install_unzip
+
+                create_directories
+                download_and_extract "$selected_version"
+                update_config_version "$selected_version"
+
+                # Source the commands.sh script and run the create_command_symlinks function
+                source /pg/installer/commands.sh
+                create_command_symlinks
                 show_exit
                 exit 0
-                ;;
-            *)
+            elif [[ "${response,,}" == "z" ]]; then
+                echo "Installation canceled."
+                exit 0
+            else
                 echo "Invalid input. Please try again."
-                ;;
-        esac
-    done
-}
-
-menu_commands() {
-    echo "Returning to the main menu..."
-    bash /pg/installer/menu_commands.sh
-}
-
-# Ensure commands.sh exists and create symlinks at the start
-ensure_commands_script
-create_command_symlinks
-
-# Start the PG Fork menu
-display_pgfork_menu
+            fi
+        done
+    else
+        echo "Invalid version. Please select a valid version from the list."
+    fi
+done
