@@ -29,7 +29,7 @@ echo -e "[${LIGHT_GREEN}3${NC}] pgstable    |  Install Latest Stable Build"
 echo -e "[${YELLOW}4${NC}] pgbeta      |  Install Latest Beta Build"
 echo -e "[${BRIGHT_MAGENTA}5${NC}] pgdev       |  Install Latest Dev Build"
 echo -e "[${CYAN}6${NC}] pgfork      |  Fork PlexGuide"
-echo -e "[${BRIGHT_BLUE}7${NC}] pginstall   |  Access the Installer Menu (Helps Repairs)"
+echo -e "[${BRIGHT_BLUE}7${NC}] pgreinstall |  To Reinstall PlexGuide (Helps /w Repairs)" 
 echo ""  # Space before exiting
 
 # Exit the script
