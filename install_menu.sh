@@ -90,7 +90,7 @@ check_and_install_docker() {
     fi
 }
 
-# Function to check and install Docker if not installed
+# Function to check and install Docker Compose if not installed
 check_and_install_compose() {
     if ! command -v docker-compose &> /dev/null; then
         echo -e "${GREEN}Installing Docker-Compose...${NC}"
@@ -106,28 +106,28 @@ validate_choice() {
     local choice="$1"
     case ${choice,,} in
         d)
-            echo "Selected PG Dev." && echo ""
+            echo "Selected PG Dev."
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_dev.sh"
             exit 0
             ;;
         s)
-            echo "Selected PG Stable." && echo ""
+            echo "Selected PG Stable."
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_stable.sh"
             exit 0
             ;;
         b)
-            echo "Selected PG Beta." && echo ""
+            echo "Selected PG Beta."
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_beta.sh"
             exit 0
             ;;
         f)
-            echo "Selected PG Fork." && echo ""
+            echo "Selected PG Fork."
             prompt_for_pin  # Prompt for PIN before downloading and installing
             download_installer_repo  # Download the main installer repo
             run_install_script "https://raw.githubusercontent.com/plexguide/Installer/v11/install_fork.sh"
@@ -146,18 +146,24 @@ validate_choice() {
 
 # Function to prompt for a 4-digit PIN before proceeding
 prompt_for_pin() {
-    local random_pin=$(printf "%04d" $((RANDOM % 10000)))
+    # Generate random 4-digit PINs
+    pin_proceed=$((RANDOM % 9000 + 1000))  # Random 4-digit PIN for proceeding
+    pin_exit=$((RANDOM % 9000 + 1000))     # Random 4-digit PIN for exiting
 
     while true; do
-        read -p "$(echo -e "Type [${RED}${random_pin}${NC}] to proceed or [${GREEN}Z${NC}] to cancel: ")" response
-        if [[ "$response" == "$random_pin" ]]; then
+        echo -e "\nTo proceed, enter this PIN: \033[95m$pin_proceed\033[0m"  # Hot pink PIN for proceeding
+        echo -e "To exit, enter this PIN: \033[32m$pin_exit\033[0m"           # Green PIN for exiting
+        echo ""
+        read -p "Enter PIN > " user_pin
+        
+        if [[ "$user_pin" == "$pin_proceed" ]]; then
             echo "Correct PIN entered. Proceeding with installation..."
             return 0
-        elif [[ "${response,,}" == "z" ]]; then
+        elif [[ "$user_pin" == "$pin_exit" ]]; then
             echo "Installation canceled."
             exit 0
         else
-            echo "Invalid input. Please try again."
+            echo "Invalid PIN. Try again."
         fi
     done
 }
