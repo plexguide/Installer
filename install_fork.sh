@@ -29,6 +29,54 @@ validate_github_repo_and_branch() {
     fi
 }
 
+# Function to update the user name
+update_user_name() {
+    read -p "Enter the new user name: " new_user
+    if [[ -n "$new_user" ]]; then
+        user="$new_user"
+        echo "user=\"$user\"" > "$CONFIG_FILE"
+        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
+        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
+        echo -e "\nUser name updated to: $user"
+        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
+        read -p ""
+    else
+        echo "User name cannot be empty. No changes made."
+    fi
+}
+
+# Function to update the repo name
+update_repo_name() {
+    read -p "Enter the new repo name: " new_repo
+    if [[ -n "$new_repo" ]]; then
+        repo="$new_repo"
+        echo "user=\"$user\"" > "$CONFIG_FILE"
+        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
+        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
+        echo -e "\nRepo name updated to: $repo"
+        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
+        read -p ""
+    else
+        echo "Repo name cannot be empty. No changes made."
+    fi
+}
+
+# Function to update the branch name
+update_branch_name() {
+    read -p "Enter the new branch name: " new_branch
+    if [[ -n "$new_branch" ]]; then
+        branch="$new_branch"
+        echo "user=\"$user\"" > "$CONFIG_FILE"
+        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
+        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
+        echo -e "\nBranch name updated to: $branch"
+        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
+        read -p ""
+    else
+        echo "Branch name cannot be empty. No changes made."
+    fi
+}
+
 # Function to set or update the VERSION in the config file
 set_config_version() {
     if [[ ! -f "$CONFIG_VERSION" ]]; then
