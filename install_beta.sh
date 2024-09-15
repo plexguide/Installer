@@ -45,6 +45,35 @@ create_directories() {
     done
 }
 
+# Function to move folders from /pg/stage/mods/ to /pg/
+move_folders() {
+    echo "Moving folders from /pg/stage/mods/ to /pg/..."
+
+    if [[ -d "/pg/stage/mods" ]]; then
+        for folder in /pg/stage/mods/*; do
+            foldername=$(basename "$folder")
+
+            # Remove the existing folder in /pg/$foldername
+            if [[ -d "/pg/$foldername" ]]; then
+                rm -rf "/pg/$foldername"
+                echo "Removed existing folder: /pg/$foldername"
+            fi
+
+            # Copy the folder from /pg/stage/mods/ to /pg/
+            cp -r "/pg/stage/mods/$foldername" "/pg/$foldername"
+            echo "Copied $foldername to /pg/"
+
+            # Set permissions and ownership for the folder and its contents
+            chown -R 1000:1000 "/pg/$foldername"
+            chmod -R +x "/pg/$foldername"
+            echo "Set permissions and ownership for /pg/$foldername and its contents"
+        done
+    else
+        echo "Source directory /pg/stage/mods does not exist. No folders to move."
+        exit 1
+    fi
+}
+
 # Function to download and extract the selected release
 download_and_extract() {
     local selected_version="$1"
@@ -59,24 +88,12 @@ download_and_extract() {
     if [[ -d "$extracted_folder" ]]; then
         echo "Found extracted folder: $extracted_folder"
                 
-        # Clear the /pg/scripts/ directory before moving files
-        echo "Clearing /pg/scripts/ directory..."
-        rm -rf /pg/scripts/*
-        
-        # Move scripts to /pg/scripts
-        if [[ -d "$extracted_folder/mods/scripts" ]]; then
-            echo "Moving scripts to /pg/scripts"
-            mv "$extracted_folder/mods/scripts/"* /pg/scripts/
-            chown -R 1000:1000 /pg/scripts/
-            chmod -R +x /pg/scripts/
-        else
-            echo "No scripts directory found in $extracted_folder"
-        fi
+        # Move all folders from /pg/stage/mods/ to /pg/
+        move_folders
 
         # Clear the /pg/stage directory after moving the files
         rm -rf /pg/stage/*
         echo "Cleared /pg/stage directory after moving files."
-        
     else
         echo "Extracted folder $extracted_folder not found!"
     fi

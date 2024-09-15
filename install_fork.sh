@@ -88,6 +88,35 @@ create_directories() {
     done
 }
 
+# Function to move folders from /pg/stage/mods/ to /pg/
+move_folders() {
+    echo "Moving folders from /pg/stage/mods/ to /pg/..."
+
+    if [[ -d "/pg/stage/mods" ]]; then
+        for folder in /pg/stage/mods/*; do
+            foldername=$(basename "$folder")
+
+            # Remove the existing folder in /pg/$foldername
+            if [[ -d "/pg/$foldername" ]]; then
+                rm -rf "/pg/$foldername"
+                echo "Removed existing folder: /pg/$foldername"
+            fi
+
+            # Copy the folder from /pg/stage/mods/ to /pg/
+            cp -r "/pg/stage/mods/$foldername" "/pg/$foldername"
+            echo "Copied $foldername to /pg/"
+
+            # Set permissions and ownership for the folder and its contents
+            chown -R 1000:1000 "/pg/$foldername"
+            chmod -R +x "/pg/$foldername"
+            echo "Set permissions and ownership for /pg/$foldername and its contents"
+        done
+    else
+        echo "Source directory /pg/stage/mods does not exist. No folders to move."
+        exit 1
+    fi
+}
+
 # Function to download and place files into /pg/stage/
 download_repository() {
     echo "Preparing /pg/stage/ directory..."
@@ -110,84 +139,7 @@ download_repository() {
     fi
 }
 
-# Function to move scripts from /pg/stage/mods/scripts to /pg/scripts/
-move_scripts() {
-    echo "Moving scripts from /pg/stage/mods/scripts to /pg/scripts/..."
-
-    if [[ -d "/pg/stage/mods/scripts" ]]; then
-        mv /pg/stage/mods/scripts/* /pg/scripts/
-
-        if [[ $? -eq 0 ]]; then
-            echo "Scripts successfully moved to /pg/scripts/."
-        else
-            echo "Failed to move scripts. Please check the file paths and permissions."
-            exit 1
-        fi
-    else
-        echo "Source directory /pg/stage/mods/scripts does not exist. No files to move."
-        menu_commands
-        exit 1
-    fi
-}
-
-# Function to update the user name
-update_user_name() {
-    read -p "Enter the new user name: " new_user
-    if [[ -n "$new_user" ]]; then
-        user="$new_user"
-        echo "user=\"$user\"" > "$CONFIG_FILE"
-        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
-        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
-        echo -e "\nUser name updated to: $user"
-        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
-        read -p ""
-    else
-        echo "User name cannot be empty. No changes made."
-    fi
-}
-
-# Function to update the repo name
-update_repo_name() {
-    read -p "Enter the new repo name: " new_repo
-    if [[ -n "$new_repo" ]]; then
-        repo="$new_repo"
-        echo "user=\"$user\"" > "$CONFIG_FILE"
-        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
-        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
-        echo -e "\nRepo name updated to: $repo"
-        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
-        read -p ""
-    else
-        echo "Repo name cannot be empty. No changes made."
-    fi
-}
-
-# Function to update the branch name
-update_branch_name() {
-    read -p "Enter the new branch name: " new_branch
-    if [[ -n "$new_branch" ]]; then
-        branch="$new_branch"
-        echo "user=\"$user\"" > "$CONFIG_FILE"
-        echo "repo=\"$repo\"" >> "$CONFIG_FILE"
-        echo "branch=\"$branch\"" >> "$CONFIG_FILE"
-        echo -e "\nBranch name updated to: $branch"
-        echo -e "\nYour changes have been recorded. Press [ENTER] to acknowledge."
-        read -p ""
-    else
-        echo "Branch name cannot be empty. No changes made."
-    fi
-}
-
-# Function to validate GitHub repository and branch
-validate_github_repo_and_branch() {
-    local api_url="https://api.github.com/repos/${user}/${repo}/branches/${branch}"
-    if curl --output /dev/null --silent --head --fail "$api_url"; then
-        return 0
-    else
-        return 1
-    fi
-}
-
+# Function to deploy PG Fork
 deploy_pg_fork() {
     # Generate random 4-digit PIN codes for "yes" and "no"
     yes_code=$(printf "%04d" $((RANDOM % 10000)))
@@ -208,8 +160,8 @@ deploy_pg_fork() {
                 echo "Repository details are valid. Proceeding with deployment..."
                 create_directories
                 download_repository
-                move_scripts
-                set_config_version  # Call set_config_version here
+                move_folders
+                set_config_version
                 create_command_symlinks
                 echo "Deployment completed successfully."
                 echo "Press [ENTER] to exit."
@@ -274,11 +226,6 @@ display_pgfork_menu() {
                 ;;
         esac
     done
-}
-
-menu_commands() {
-    echo "Returning to the main menu..."
-    bash /pg/installer/menu_commands.sh
 }
 
 # Ensure commands.sh exists and create symlinks at the start

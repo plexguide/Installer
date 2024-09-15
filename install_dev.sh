@@ -15,7 +15,6 @@ create_directories() {
     # Define directories to create
     directories=(
         "/pg/config"
-        "/pg/scripts"
         "/pg/apps"
         "/pg/stage"
         "/pg/installer"
@@ -60,23 +59,33 @@ download_repository() {
     fi
 }
 
-# Function to move scripts from /pg/stage/mods/scripts to /pg/scripts/
-move_scripts() {
-    echo "Moving scripts from /pg/stage/mods/scripts to /pg/scripts/..."
+# Function to move folders from /pg/stage/mods/ to /pg/
+move_folders() {
+    echo "Moving folders from /pg/stage/mods/ to /pg/..."
 
-    # Check if the source directory exists
-    if [[ -d "/pg/stage/mods/scripts" ]]; then
-        mv /pg/stage/mods/scripts/* /pg/scripts/
+    # Check if /pg/stage/mods/ exists
+    if [[ -d "/pg/stage/mods" ]]; then
+        # Loop through each primary folder in /pg/stage/mods/
+        for folder in /pg/stage/mods/*; do
+            foldername=$(basename "$folder")
 
-        # Verify move success
-        if [[ $? -eq 0 ]]; then
-            echo "Scripts successfully moved to /pg/scripts/."
-        else
-            echo "Failed to move scripts. Please check the file paths and permissions."
-            exit 1
-        fi
+            # Remove the existing folder in /pg/$foldername
+            if [[ -d "/pg/$foldername" ]]; then
+                rm -rf "/pg/$foldername"
+                echo "Removed existing folder: /pg/$foldername"
+            fi
+
+            # Copy the folder from /pg/stage/mods/ to /pg/
+            cp -r "/pg/stage/mods/$foldername" "/pg/$foldername"
+            echo "Copied $foldername to /pg/"
+
+            # Set permissions and ownership for the folder and its contents
+            chown -R 1000:1000 "/pg/$foldername"
+            chmod -R +x "/pg/$foldername"
+            echo "Set permissions and ownership for /pg/$foldername and its contents"
+        done
     else
-        echo "Source directory /pg/stage/mods/scripts does not exist. No files to move."
+        echo "Source directory /pg/stage/mods does not exist. No folders to move."
         exit 1
     fi
 }
@@ -104,8 +113,7 @@ show_exit() {
 # New installation process
 create_directories
 download_repository
-move_scripts
-move_apps
+move_folders
 check_and_install_docker
 set_config_version
 
