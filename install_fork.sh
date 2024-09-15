@@ -16,8 +16,18 @@ NC="\033[0m" # No color
 
 # Default values
 user="plexguide"
-repo="PlexGuide.com"
+repo="plexguide.com"
 branch="v11"
+
+# Function to validate GitHub repository and branch
+validate_github_repo_and_branch() {
+    local api_url="https://api.github.com/repos/${user}/${repo}/branches/${branch}"
+    if curl --output /dev/null --silent --head --fail "$api_url"; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 # Function to set or update the VERSION in the config file
 set_config_version() {
