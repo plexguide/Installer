@@ -167,12 +167,16 @@ run_install_script() {
     local script_url="$1"
     local installer_dir="/pg/installer"
     local script_file="$installer_dir/install_script.sh"
+    local random_number=$(date +%s)  # Add a random query string to bypass cache
+
+    # Append query string to force bypassing the cache
+    script_url="${script_url}?nocache=$random_number"
 
     # Prepare the /pg/installer directory
     prepare_installer_directory
 
     echo "Downloading the installation script..."
-    curl -sL "$script_url" -o "$script_file"
+    curl -H 'Cache-Control: no-cache' -sL "$script_url" -o "$script_file"
     
     # Check if the script was downloaded successfully
     if [[ -f "$script_file" ]]; then
@@ -193,7 +197,6 @@ check_and_install_compose
 
 # Main loop to display the interface and handle user input
 while true; do
- # Check and install Docker if needed
     display_interface
     read -p "Make a Choice > " user_choice
     validate_choice "$user_choice"
