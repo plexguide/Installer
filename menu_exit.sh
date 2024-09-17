@@ -36,13 +36,11 @@ setup_pg_executables() {
 
 # Function to update permissions for /pg directory
 update_pg_permissions() {
-    echo "Updating permissions for /pg directory..."
     if [[ -d "/pg" ]]; then
         sudo chown -R 1000:1000 /pg
         sudo find /pg -type d -exec chmod 755 {} +
         sudo find /pg -type f -exec chmod 644 {} +
         sudo chmod +x /pg/scripts/*.sh /pg/installer/*.sh /pgreinstall/*.sh 2>/dev/null
-        echo "Permissions updated for /pg directory"
     else
         echo "Warning: /pg directory not found"
     fi
@@ -71,8 +69,6 @@ echo -e "[${BRIGHT_MAGENTA}5${NC}] pgdev       |  Install Latest Dev Build"
 echo -e "[${CYAN}6${NC}] pgfork      |  Fork PlexGuide"
 echo -e "[${BRIGHT_BLUE}7${NC}] pgreinstall |  To Reinstall PlexGuide (Helps /w Repairs)" 
 echo ""  # Space before exiting
-
-echo "Setup and permission updates completed. Please run PlexGuide commands as the non-root user."
 
 # Exit the script
 exit 0
