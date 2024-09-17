@@ -110,9 +110,29 @@ EOF
     info "pginstall command setup complete. You can now use the pginstall command to run the installer."
 }
 
+# Function to ensure all created commands are 1000:1000 and executable
+ensure_command_permissions() {
+    info "Ensuring correct permissions for all created commands..."
+
+    local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pginstall")
+
+    for cmd in "${commands[@]}"; do
+        if [[ -f "/usr/local/bin/$cmd" ]]; then
+            sudo chown 1000:1000 "/usr/local/bin/$cmd"
+            sudo chmod 755 "/usr/local/bin/$cmd"
+            info "Set permissions for $cmd: owner 1000:1000, mode 755"
+        else
+            warn "Command $cmd not found in /usr/local/bin"
+        fi
+    done
+
+    info "Permissions check and update completed."
+}
+
 # Main script execution
 execute_adduser_script
 create_command_symlinks
 setup_pginstall_command
+ensure_command_permissions
 
 info "Setup complete. You can now use the pginstall command to run the installer."
