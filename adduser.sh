@@ -28,10 +28,10 @@ setup_pg_directory() {
 
 check_existing_config() {
     if [[ -f "/pg/config/username.cfg" ]]; then
-        #if grep -q "username" "/pg/config/username.cfg"; then
+        if grep -q "username" "/pg/config/username.cfg"; then
             info "Existing configuration found in /pg/config/username.cfg. Skipping user setup."
             exit 0
-        #fi
+        fi
     fi
 }
 
