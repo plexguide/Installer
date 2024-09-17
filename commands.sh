@@ -20,8 +20,15 @@ error() {
 
 # Function to execute the adduser.sh script
 execute_adduser_script() {
+    local config_file="/pg/config/username.cfg"
     local adduser_script_url="https://raw.githubusercontent.com/plexguide/Installer/refs/heads/v11/adduser.sh"
     local tmp_script="/tmp/adduser_tmp.sh"
+
+    # Check if the config file exists and contains the word "username"
+    if [[ -f "$config_file" ]] && grep -q "username" "$config_file"; then
+        info "Existing user configuration found. Skipping user setup."
+        return 0
+    fi
 
     info "Downloading and executing the adduser script..."
 
