@@ -32,6 +32,21 @@ check_existing_config() {
             info "Existing configuration found in /pg/config/username.cfg. Skipping user setup."
             exit 0
         fi
+    else
+        local existing_user=$(id -nu 1000 2>/dev/null)
+        if [[ -n "$existing_user" ]]; then
+            warn "User with UID 1000 detected: $existing_user"
+            read -p "Would you like to keep this user $existing_user? (y/N): " keep_user
+            if [[ "$keep_user" == [yY] ]]; then
+                info "Keeping user $existing_user and storing in configuration."
+                mkdir -p /pg/config
+                echo "username=\"$existing_user\"" > /pg/config/username.cfg
+                chown 1000:1000 /pg/config/username.cfg
+                chmod 744 /pg/config/username.cfg
+                info "Configuration file created at /pg/config/username.cfg"
+                exit 0
+            fi
+        fi
     fi
 }
 
@@ -125,7 +140,7 @@ setup_user() {
 # Setup /pg directory permissions in the background
 setup_pg_directory &
 
-# Check for existing configuration
+# Check for existing configuration or UID 1000 user
 check_existing_config
 
 # Main execution
