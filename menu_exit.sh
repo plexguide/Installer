@@ -1,5 +1,28 @@
 #!/bin/bash
 
+# Initial script to set permissions for PG executables
+setup_pg_executables() {
+    local executables=(
+        "/usr/local/bin/pg"
+        "/usr/local/bin/plexguide"
+        "/usr/local/bin/pgstable"
+        "/usr/local/bin/pgbeta"
+        "/usr/local/bin/pgdev"
+        "/usr/local/bin/pgfork"
+        "/usr/local/bin/pgreinstall"
+    )
+
+    for executable in "${executables[@]}"; do
+        if [[ -f "$executable" ]]; then
+            sudo chown 1000:1000 "$executable"
+            sudo chmod +x "$executable"
+        fi
+    done
+}
+
+# Run the setup function
+setup_pg_executables
+
 # ANSI color codes
 BRIGHT_RED="\033[1;31m"
 ORANGE="\033[0;33m"
