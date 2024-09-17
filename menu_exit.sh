@@ -1,28 +1,5 @@
 #!/bin/bash
 
-# Initial script to set permissions for PG executables
-setup_pg_executables() {
-    local executables=(
-        "/usr/local/bin/pg"
-        "/usr/local/bin/plexguide"
-        "/usr/local/bin/pgstable"
-        "/usr/local/bin/pgbeta"
-        "/usr/local/bin/pgdev"
-        "/usr/local/bin/pgfork"
-        "/usr/local/bin/pgreinstall"
-    )
-
-    for executable in "${executables[@]}"; do
-        if [[ -f "$executable" ]]; then
-            sudo chown 1000:1000 "$executable"
-            sudo chmod +x "$executable"
-        fi
-    done
-}
-
-# Run the setup function
-setup_pg_executables
-
 # ANSI color codes
 BRIGHT_RED="\033[1;31m"
 ORANGE="\033[0;33m"
@@ -35,8 +12,50 @@ BRIGHT_BLUE="\033[1;34m"
 BRIGHT_MAGENTA="\033[1;35m"
 NC="\033[0m"  # No color
 
-# Clear the screen at the start
+# Function to set up PG executables and their permissions
+setup_pg_executables() {
+    local executables=(
+        "/usr/local/bin/pg"
+        "/usr/local/bin/plexguide"
+        "/usr/local/bin/pgstable"
+        "/usr/local/bin/pgbeta"
+        "/usr/local/bin/pgdev"
+        "/usr/local/bin/pgfork"
+        "/usr/local/bin/pgreinstall"
+    )
+
+    echo "Setting up PG executables..."
+    for executable in "${executables[@]}"; do
+        if [[ -L "$executable" ]]; then
+            sudo chown 1000:1000 "$executable"
+            sudo chmod 755 "$executable"
+            echo "Updated symlink: $executable"
+        else
+            echo "Warning: $executable not found or not a symlink"
+        fi
+    done
+}
+
+# Function to update permissions for /pg directory
+update_pg_permissions() {
+    echo "Updating permissions for /pg directory..."
+    if [[ -d "/pg" ]]; then
+        sudo chown -R 1000:1000 /pg
+        sudo find /pg -type d -exec chmod 755 {} +
+        sudo find /pg -type f -exec chmod 644 {} +
+        sudo chmod +x /pg/scripts/*.sh /pg/installer/*.sh /pgreinstall/*.sh 2>/dev/null
+        echo "Permissions updated for /pg directory"
+    else
+        echo "Warning: /pg directory not found"
+    fi
+}
+
+# Main script execution
 clear
+
+# Run setup functions
+setup_pg_executables
+update_pg_permissions
 
 # Display the header
 echo -e "${BRIGHT_RED}${BOLD}════════════════════════════════════════════════════════${NC}"
@@ -55,17 +74,7 @@ echo -e "[${CYAN}6${NC}] pgfork      |  Fork PlexGuide"
 echo -e "[${BRIGHT_BLUE}7${NC}] pgreinstall |  To Reinstall PlexGuide (Helps /w Repairs)" 
 echo ""  # Space before exiting
 
-# Function to update permissions and ownership
-update_pg_permissions() {
-    if [[ -d "/pg" ]]; then
-        find /pg -type d -exec chmod 755 {} + 2>/dev/null
-        find /pg -type f -exec chmod 644 {} + 2>/dev/null
-        chown -R 1000:1000 /pg 2>/dev/null
-    fi
-}
-
-# Run the update_pg_permissions function in the background
-update_pg_permissions &
+echo "Setup and permission updates completed. Please run PlexGuide commands as the non-root user."
 
 # Exit the script
 exit 0
