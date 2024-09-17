@@ -24,12 +24,10 @@ setup_pg_executables() {
         "/usr/local/bin/pgreinstall"
     )
 
-    echo "Setting up PG executables..."
     for executable in "${executables[@]}"; do
         if [[ -L "$executable" ]]; then
             sudo chown 1000:1000 "$executable"
             sudo chmod 755 "$executable"
-            echo "Updated symlink: $executable"
         else
             echo "Warning: $executable not found or not a symlink"
         fi

@@ -55,6 +55,7 @@ create_command_symlinks() {
         ["pgbeta"]="/pg/installer/install_beta.sh"
         ["pgfork"]="/pg/installer/install_fork.sh"
         ["pgstable"]="/pg/installer/install_stable.sh"
+        ["pgreinstall"]="/pgreinstall/pgreinstall.sh"
     )
 
     # Loop over the associative array to create symbolic links and set executable permissions
@@ -114,19 +115,33 @@ EOF
 ensure_command_permissions() {
     info "Ensuring correct permissions for all created commands..."
 
-    local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pginstall")
+    local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pginstall" "pgreinstall")
 
     for cmd in "${commands[@]}"; do
-        if [[ -f "/usr/local/bin/$cmd" ]]; then
+        if [[ -L "/usr/local/bin/$cmd" ]]; then
             sudo chown 1000:1000 "/usr/local/bin/$cmd"
             sudo chmod 755 "/usr/local/bin/$cmd"
             info "Set permissions for $cmd: owner 1000:1000, mode 755"
         else
-            warn "Command $cmd not found in /usr/local/bin"
+            warn "Command $cmd not found or not a symlink in /usr/local/bin"
         fi
     done
 
     info "Permissions check and update completed."
+}
+
+# Function to update permissions for /pg directory
+update_pg_permissions() {
+    info "Updating permissions for /pg directory..."
+    if [[ -d "/pg" ]]; then
+        sudo chown -R 1000:1000 /pg
+        sudo find /pg -type d -exec chmod 755 {} +
+        sudo find /pg -type f -exec chmod 644 {} +
+        sudo chmod +x /pg/scripts/*.sh /pg/installer/*.sh /pgreinstall/*.sh 2>/dev/null
+        info "Permissions updated for /pg directory"
+    else
+        warn "/pg directory not found"
+    fi
 }
 
 # Main script execution
@@ -134,5 +149,6 @@ execute_adduser_script
 create_command_symlinks
 setup_pginstall_command
 ensure_command_permissions
+update_pg_permissions
 
 info "Setup complete. You can now use the pginstall command to run the installer."
