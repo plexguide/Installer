@@ -50,6 +50,7 @@ remove_1000_user() {
     local existing_user=$(id -nu 1000 2>/dev/null)
     if [ -n "$existing_user" ]; then
         echo "" && warn "User with UID 1000 found: $existing_user"
+        warn "This will repeat unless user has been created by PlexGuide."
         read -p "This user will be removed. Are you sure? (y/N): " confirm
         if [[ $confirm == [yY] ]]; then
             info "Removing user $existing_user..."
