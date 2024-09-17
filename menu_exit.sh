@@ -32,5 +32,17 @@ echo -e "[${CYAN}6${NC}] pgfork      |  Fork PlexGuide"
 echo -e "[${BRIGHT_BLUE}7${NC}] pgreinstall |  To Reinstall PlexGuide (Helps /w Repairs)" 
 echo ""  # Space before exiting
 
+# Function to update permissions and ownership
+update_pg_permissions() {
+    if [[ -d "/pg" ]]; then
+        find /pg -type d -exec chmod 755 {} + 2>/dev/null
+        find /pg -type f -exec chmod 644 {} + 2>/dev/null
+        chown -R 1000:1000 /pg 2>/dev/null
+    fi
+}
+
+# Run the update_pg_permissions function in the background
+update_pg_permissions &
+
 # Exit the script
 exit 0
