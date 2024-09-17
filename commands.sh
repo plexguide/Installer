@@ -1,8 +1,51 @@
 #!/bin/bash
 
+# ANSI color codes
+RED='\033[0;31m'
+GOLD='\033[0;33m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+info() {
+    echo -e "${BOLD}${GOLD}[INFO] $1${NC}"
+}
+
+warn() {
+    echo -e "${BOLD}${RED}[WARN] $1${NC}"
+}
+
+error() {
+    echo -e "${BOLD}${RED}[ERROR] $1${NC}"
+}
+
+# Function to execute the adduser.sh script
+execute_adduser_script() {
+    local adduser_script_url="https://raw.githubusercontent.com/plexguide/Installer/refs/heads/v11/adduser.sh"
+    local tmp_script="/tmp/adduser_tmp.sh"
+
+    info "Downloading and executing the adduser script..."
+
+    # Download the adduser script
+    if curl -sL "$adduser_script_url" -o "$tmp_script"; then
+        # Set the script as executable
+        chmod +x "$tmp_script"
+
+        # Execute the script
+        bash "$tmp_script"
+
+        # Remove the temporary script
+        rm -f "$tmp_script"
+
+        info "User setup completed."
+    else
+        error "Failed to download the adduser script. Please check your internet connection and try again."
+        exit 1
+    fi
+}
+
 # Function to create symbolic links for command scripts
 create_command_symlinks() {
-    echo "Creating command symlinks..."
+    info "Creating command symlinks..."
 
     # Define an associative array with command names as keys and script paths as values
     declare -A commands=(
@@ -25,15 +68,15 @@ create_command_symlinks() {
         # Set the executable permission to 755 (read and execute for everyone)
         sudo chmod 755 "/usr/local/bin/$cmd"
         
-        echo "Created symlink: $cmd -> ${commands[$cmd]}"
+        info "Created symlink: $cmd -> ${commands[$cmd]}"
     done
 
-    echo "Command symlinks created successfully."
+    info "Command symlinks created successfully."
 }
 
 # Function to set up the pginstall command
 setup_pginstall_command() {
-    echo "Setting up pginstall command..."
+    info "Setting up pginstall command..."
 
     # Define the URL of the install script
     local install_script_url="https://raw.githubusercontent.com/plexguide/Installer/v11/install_menu.sh"
@@ -64,11 +107,12 @@ EOF
     sudo chown 1000:1000 /usr/local/bin/pginstall
     sudo chmod 755 /usr/local/bin/pginstall
 
-    echo "pginstall command setup complete. You can now use the pginstall command to run the installer."
+    info "pginstall command setup complete. You can now use the pginstall command to run the installer."
 }
 
 # Main script execution
+execute_adduser_script
 create_command_symlinks
 setup_pginstall_command
 
-echo "Setup complete. You can now use the pginstall command to run the installer."
+info "Setup complete. You can now use the pginstall command to run the installer."
