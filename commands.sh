@@ -6,9 +6,9 @@ GOLD='\033[0;33m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-#info() {
-#    echo -e "${BOLD}${GOLD}[INFO] $1${NC}"
-#}
+info() {
+    echo -e "${BOLD}${GOLD}[INFO] $1${NC}"
+}
 
 warn() {
     echo -e "${BOLD}${RED}[WARN] $1${NC}"
@@ -76,7 +76,7 @@ create_command_symlinks() {
         # Set the executable permission to 755 (read and execute for everyone)
         sudo chmod 755 "/usr/local/bin/$cmd"
         
-        info "Created symlink: $cmd -> ${commands[$cmd]}"
+#        info "Created symlink: $cmd -> ${commands[$cmd]}"
     done
 
     info "Command symlinks created successfully."
@@ -100,7 +100,7 @@ ensure_command_permissions() {
         if [[ -L "/usr/local/bin/$cmd" ]]; then
             sudo chown 1000:1000 "/usr/local/bin/$cmd"
             sudo chmod 755 "/usr/local/bin/$cmd"
-            info "Set permissions for $cmd: owner 1000:1000, mode 755"
+#            info "Set permissions for $cmd: owner 1000:1000, mode 755"
         else
             warn "Command $cmd not found or not a symlink in /usr/local/bin"
         fi
@@ -117,7 +117,7 @@ update_pg_permissions() {
         sudo find /pg -type d -exec chmod 755 {} +
         sudo find /pg -type f -exec chmod 644 {} +
         sudo chmod +x /pg/scripts/*.sh /pg/installer/*.sh /pgreinstall/*.sh 2>/dev/null
-        info "Permissions updated for /pg directory"
+#        info "Permissions updated for /pg directory"
     else
         warn "/pg directory not found"
     fi
@@ -130,4 +130,4 @@ setup_temp
 ensure_command_permissions
 update_pg_permissions
 
-info "Setup complete. You can now use the pginstall command to run the installer."
+# info "Setup complete. You can now use the pginstall command to run the installer."
