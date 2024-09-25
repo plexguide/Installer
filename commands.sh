@@ -6,9 +6,9 @@ GOLD='\033[0;33m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-info() {
-    echo -e "${BOLD}${GOLD}[INFO] $1${NC}"
-}
+#info() {
+#    echo -e "${BOLD}${GOLD}[INFO] $1${NC}"
+#}
 
 warn() {
     echo -e "${BOLD}${RED}[WARN] $1${NC}"
