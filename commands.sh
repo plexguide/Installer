@@ -18,7 +18,7 @@ error() {
     echo -e "${BOLD}${RED}[ERROR] $1${NC}"
 }
 
-# Function to execute the adduser.sh script
+# Function to execute the adduser.sh script with better control
 execute_adduser_script() {
     local config_file="/pg/config/username.cfg"
     local adduser_script_url="https://raw.githubusercontent.com/plexguide/Installer/refs/heads/v11/adduser.sh"
@@ -26,26 +26,31 @@ execute_adduser_script() {
 
     # Check if the config file exists and contains the word "username"
     if [[ -f "$config_file" ]] && grep -q "username" "$config_file"; then
-        info "Existing user configuration found. Skipping user setup."
+#        echo "Existing user configuration found. Skipping user setup."
         return 0
     fi
 
-    info "Downloading and executing the adduser script..."
+    echo "Downloading the adduser script from URL..."
 
-    # Download the adduser script
+    # Download the script to a temporary file
     if curl -sL "$adduser_script_url" -o "$tmp_script"; then
-        # Set the script as executable
+        echo "Download successful."
+
+        # Make sure the script is executable
         chmod +x "$tmp_script"
 
         # Execute the script
-        bash "$tmp_script"
+        if bash "$tmp_script"; then
+            echo "User setup completed successfully."
+        else
+            echo "Error: Failed to execute the adduser script."
+            exit 1
+        fi
 
         # Remove the temporary script
         rm -f "$tmp_script"
-
-        info "User setup completed."
     else
-        error "Failed to download the adduser script. Please check your internet connection and try again."
+        echo "Error: Failed to download the adduser script. Please check your internet connection and try again."
         exit 1
     fi
 }
@@ -80,14 +85,6 @@ create_command_symlinks() {
     done
 
 #    info "Command symlinks created successfully."
-}
-
-# Build PG Temp Directory
-setup_temp() {
-    local tmp_dir="/pg/tmp"
-    sudo mkdir -p "$tmp_dir"
-    chmod +x "$tmp_script"
-    bash "$tmp_script"
 }
 
 # Function to ensure all created commands are 1000:1000 and executable
@@ -126,7 +123,6 @@ update_pg_permissions() {
 # Main script execution
 execute_adduser_script
 create_command_symlinks
-setup_temp
 ensure_command_permissions
 update_pg_permissions
 
