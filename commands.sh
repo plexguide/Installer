@@ -52,7 +52,7 @@ execute_adduser_script() {
 
 # Function to create symbolic links for command scripts
 create_command_symlinks() {
-    info "Creating command symlinks..."
+#    info "Creating command symlinks..."
 
     # Define an associative array with command names as keys and script paths as values
     declare -A commands=(
@@ -79,7 +79,7 @@ create_command_symlinks() {
 #        info "Created symlink: $cmd -> ${commands[$cmd]}"
     done
 
-    info "Command symlinks created successfully."
+#    info "Command symlinks created successfully."
 }
 
 # Build PG Temp Directory
@@ -92,7 +92,7 @@ setup_temp() {
 
 # Function to ensure all created commands are 1000:1000 and executable
 ensure_command_permissions() {
-    info "Ensuring correct permissions for all created commands..."
+#    info "Ensuring correct permissions for all created commands..."
 
     local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pginstall" "pgreinstall")
 
@@ -106,12 +106,12 @@ ensure_command_permissions() {
         fi
     done
 
-    info "Permissions check and update completed."
+#    info "Permissions check and update completed."
 }
 
 # Function to update permissions for /pg directory
 update_pg_permissions() {
-    info "Updating permissions for /pg directory..."
+#    info "Updating permissions for /pg directory..."
     if [[ -d "/pg" ]]; then
         sudo chown -R 1000:1000 /pg
         sudo find /pg -type d -exec chmod 755 {} +
