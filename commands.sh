@@ -94,7 +94,7 @@ setup_temp() {
 ensure_command_permissions() {
 #    info "Ensuring correct permissions for all created commands..."
 
-    local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pginstall" "pgreinstall")
+    local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pgreinstall")
 
     for cmd in "${commands[@]}"; do
         if [[ -L "/usr/local/bin/$cmd" ]]; then
