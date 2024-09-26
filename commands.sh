@@ -10,6 +10,7 @@ NC='\033[0m' # No Color
 CONFIG_FILE="/pg/config/pgfork.cfg"
 CONFIG_VERSION="/pg/config/config.cfg"
 COMMANDS_SCRIPT="/pg/installer/commands.sh"
+INSTALL_FORK_SCRIPT="/pg/installer/install_fork.sh"
 
 # Default values
 user="plexguide"
@@ -34,13 +35,18 @@ parse_args() {
 
 # Function to deploy PG Fork with or without PIN check based on flag
 deploy_pg_fork_menu() {
-    deploy_pg_fork "$skip_pin_check"
+    if [[ "$skip_pin_check" == "true" ]]; then
+        # Call install_fork.sh and pass "true" to skip the PIN check
+        bash "$INSTALL_FORK_SCRIPT" -n
+    else
+        # Call install_fork.sh without skipping the PIN check
+        bash "$INSTALL_FORK_SCRIPT"
+    fi
 }
 
 # Main Execution Flow
 parse_args "$@"
 deploy_pg_fork_menu
-
 
 info() {
     echo -e "${BOLD}${GOLD}[INFO] $1${NC}"
