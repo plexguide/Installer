@@ -66,6 +66,7 @@ create_command_symlinks() {
         ["pgdev"]="/pg/installer/install_dev.sh"
         ["pgbeta"]="/pg/installer/install_beta.sh"
         ["pgfork"]="/pg/installer/install_fork.sh"
+        ["pgforknow"]="/pg/installer/install_forknow.sh"
         ["pgstable"]="/pg/installer/install_stable.sh"
         ["pgreinstall"]="/pgreinstall/pgreinstall.sh"
     )
@@ -91,7 +92,7 @@ create_command_symlinks() {
 ensure_command_permissions() {
 #    info "Ensuring correct permissions for all created commands..."
 
-    local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pgreinstall")
+    local commands=("plexguide" "pg" "pgdev" "pgbeta" "pgfork" "pgstable" "pgforknow" "pgreinstall")
 
     for cmd in "${commands[@]}"; do
         if [[ -L "/usr/local/bin/$cmd" ]]; then
