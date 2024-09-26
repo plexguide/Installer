@@ -163,7 +163,8 @@ deploy_pg_fork() {
 }
 
 show_exit() {
-    bash /pg/installer/menu_exit.sh
+    sudo plexguide
+    exit 0
 }
 
 menu_commands() {
