@@ -198,47 +198,73 @@ move_folders() {
     fi
 }
 
-# New Function: Deploy PG Fork with updated 4-digit PIN format
+# Function to deploy PG Fork, bypassing PIN check if -n flag is passed
 deploy_pg_fork() {
-    # Generate random 4-digit PIN codes for "yes" and "no"
-    yes_code=$(printf "%04d" $((RANDOM % 10000)))
-    no_code=$(printf "%04d" $((RANDOM % 10000)))
-    echo "" && echo "You have chosen to deploy the PG Fork."
-    while true; do
-        echo ""
-        # Two-sentence format for PIN prompt
-        echo -e "To proceed, enter this PIN: ${BOLD}${HOT_PINK}${yes_code}${NC}"
-        echo -e "To cancel, enter this PIN: ${BOLD}${LIGHT_GREEN}${no_code}${NC}"
-        
-       echo && read -p "Enter PIN > " response
+    local skip_pin_check=$1
 
-        if [[ "$response" == "$yes_code" ]]; then
-            echo "Validating repository details..."
-            if validate_github_repo_and_branch; then
-                echo ""
-                echo "Repository details are valid. Proceeding with deployment..."
-                create_directories
-                download_repository
-                move_folders
-                set_config_version  # Call set_config_version here
-                create_command_symlinks
-                show_exit
-                exit 0
-            else
-                echo ""
-                echo "Invalid repository details. The user, repo, and/or branch is not valid."
-                echo "Please update the information using the menu options."
-                echo "Press [ENTER] to acknowledge and return to the menu."
-                read -p ""
-                return
-            fi
-        elif [[ "$response" == "$no_code" ]]; then
-            echo "Deployment canceled."
-            break
+    if [[ "$skip_pin_check" == "true" ]]; then
+        # Skip the PIN check and deploy immediately
+        echo "Skipping PIN check and proceeding with deployment..."
+
+        echo "Validating repository details..."
+        if validate_github_repo_and_branch; then
+            echo ""
+            echo "Repository details are valid. Proceeding with deployment..."
+            create_directories
+            download_repository
+            move_folders
+            set_config_version  # Call set_config_version here
+            create_command_symlinks
+            show_exit
+            exit 0
         else
-            echo && echo "Invalid input. Please try again."
+            echo ""
+            echo "Invalid repository details. The user, repo, and/or branch is not valid."
+            echo "Please update the information using the menu options."
+            echo "Press [ENTER] to acknowledge and return to the menu."
+            read -p ""
+            return
         fi
-    done
+    else
+        # PIN verification for normal flow
+        yes_code=$(printf "%04d" $((RANDOM % 10000)))
+        no_code=$(printf "%04d" $((RANDOM % 10000)))
+        echo "" && echo "You have chosen to deploy the PG Fork."
+        while true; do
+            echo ""
+            echo -e "To proceed, enter this PIN: ${BOLD}${HOT_PINK}${yes_code}${NC}"
+            echo -e "To cancel, enter this PIN: ${BOLD}${LIGHT_GREEN}${no_code}${NC}"
+            
+            echo && read -p "Enter PIN > " response
+
+            if [[ "$response" == "$yes_code" ]]; then
+                echo "Validating repository details..."
+                if validate_github_repo_and_branch; then
+                    echo ""
+                    echo "Repository details are valid. Proceeding with deployment..."
+                    create_directories
+                    download_repository
+                    move_folders
+                    set_config_version  # Call set_config_version here
+                    create_command_symlinks
+                    show_exit
+                    exit 0
+                else
+                    echo ""
+                    echo "Invalid repository details. The user, repo, and/or branch is not valid."
+                    echo "Please update the information using the menu options."
+                    echo "Press [ENTER] to acknowledge and return to the menu."
+                    read -p ""
+                    return
+                fi
+            elif [[ "$response" == "$no_code" ]]; then
+                echo "Deployment canceled."
+                break
+            else
+                echo && echo "Invalid input. Please try again."
+            fi
+        done
+    fi
 }
 
 show_exit() {
